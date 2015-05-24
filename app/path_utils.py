@@ -13,7 +13,7 @@ def current_dir(dirpath):
     os.chdir(dirpath)
     yield
     os.chdir(old_dir)
-    
+
 def make_sure_dir(dir_path):
     """Make sure path exists, otherwise create the directory"""
     if not os.path.isdir(dir_path):

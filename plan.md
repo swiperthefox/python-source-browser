@@ -26,6 +26,10 @@ To browse the sources of a project, we want to do:
 
 6. Associated with the call stack view, we want to go back thus pop off one or more frames.
 
+7. Allow user to add notes to symbols, and show them as tool tips.
+
+   These notes should be saved in a seperate place, without changing originial python source code.
+
 8. (For later)In the opposite direction of #4, to go the places that using the current definition. This needs:
 
     1. To find out the closed definition where the click is in
@@ -35,26 +39,43 @@ To browse the sources of a project, we want to do:
 
 ## Implementation
 
-* Generate the cross referencing info:
+### Generate the cross referencing info:
 
-    "Goto definition" can be done with *ctages* and *pygments*. With the help of *ctags*, *Pygments* can generated syntax highlighted code, with the cross references link built in the result html.
+"Goto definition" can be done with *ctages* and *pygments*. With the help of *ctags*, *Pygments* can generated syntax highlighted code, with the cross references link built in the result html.
 
-* User interface:
+### User interface:
 
-    Will use a browser, using knockout js.
+Will use a browser, using knockout js.
 
-    * Define a tree compoenent for knockout js.
+* Define a tree compoenent for knockout js.
 
-       Some examples are floating in the internet, will use one of them as a starting point.
+    Some examples are floating in the internet, will use one of them as a starting point.
 
-    * A call stack view.
+* A call stack view.
 
-    * Handle the "click" event using our own function, to:
+* Handle the "click" event using our own function, to:
 
-       1. Get a chance to trace the links
+    1. Get a chance to trace the links
 
-       2. To control where the linked file will be shown
+    2. To control where the linked file will be shown
 
-* Data Source for UI:
+### Data Source for UI:
 
-    A simple flask app will do.
+A simple flask app will do the job.
+
+#### API:
+
+* GET, /path/to/xxx.py.seg
+
+    Generate or grab the syntax highlighted version of /path/to/xxx.py
+
+* GET, /notes
+
+    Get all notes as a json file
+
+* POST, /notes/
+
+    Create a note which is associated with a symbol, {'name': symbol, 'note': '123'}
+
+
+
