@@ -52,3 +52,10 @@ class PSBServerTestCase(TestCase, HTMLTestMixin):
         self.check_link_for_symbol(html_code,
                                    [("Test", "/dir2/f2_1.py.html#L-1"),
                                     ("a", "/f1_1.py.html#L-1")])
+
+    def test_get_directory(self):
+        result = self.app.get('/file/')
+        print result.data
+        dir_struct = json.loads(result.data)
+        self.assertEqual(dir_struct['name'], 'root')
+        self.assertEqual(len(dir_struct['children']), 5)

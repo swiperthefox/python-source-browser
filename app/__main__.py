@@ -65,10 +65,11 @@ def create_note():
     psb_db.add_note([data[key] for key in ('location', 'symbol', 'note')])
     return "ok"
 
+@app.route('/file/', defaults={'path': ''})
 @app.route('/file/<path:path>')
 def get_source(path):
-    # if path == '':
-    #     return jsonify(list_dir(current_app.config['PROJECTROOT']))
+    if path == '':
+        return jsonify(list_dir(current_app.config['PROJECTROOT']))
     if path.endswith('.py'):
         psb_db = get_db()
         result = psb_db.get_html(path)
