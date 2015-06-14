@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title>title</title>
+    <style type="text/css">
+      #left-column, #right-column {
+      display: inline-block;
+      margin-top: 20px;
+      }
+      #left-column {
+      position: sticky;
+      width: 600px;
+      margin-left: 20px;
+      margin-top: 20px;
+      vertical-align: top;
+      }
+      .single-unit {
+      border-radius: 12px 12px 12px 12px;
+      -moz-border-radius: 12px 12px 12px 12px;
+      -webkit-border-radius: 12px 12px 12px 12px;
+      border: 0px solid #000000;
+      background: #f2c66d;
+      }
+      #right-column {
+      width: 800px;
+      height: 700px;
+      margin-left: 40px;
+      overflow-y: auto;
+      }
+      .nav-frame {
+      margin: 5px 10px;
+      border-radius: 6px 6px 6px 6px;
+      -moz-border-radius: 6px 6px 6px 6px;
+      -webkit-border-radius: 6px 6px 6px 6px;
+      border: 0px solid #000000;
+      background: #f2c66d;
+      }
+      .tab-content {
+      height: 700px;
+      overflow-y: auto;
+      }
+      .frame-title {
+      position: relative;
+      width: 100%;
+      }
+      .eject-frame-btn {
+      position: absolute;
+      right: 5px;
+      display: inline-block;
+      }
+    </style>
+  </head>
+  <body>
+    <script src="/static/js/lib/jquery-2.1.4.min.js"></script>
+    <link rel="stylesheet" href="/static/css/jstree/style.min.css" />
+    <script src="/static/js/lib/jstree.min.js"></script>
+    <!-- Latest compiled and minified CSS -->
+    <link rel="stylesheet" href="/static/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/static/css/bootstrap-theme.min.css">
+    <script src="/static/js/lib/bootstrap.min.js"></script>
+    <script src="/static/js/lib/knockout-3.3.0.js"></script>
+    <link rel="stylesheet" href="/static/css/pastie.css" />
+
+    <div id="left-column" class="nav nav-tabs">
+      <ul class="nav nav-tabs" role="tablist" id="myTab">
+        <li role="presentation" class="active">
+          <a href="#directory" aria-controls="directory" role="tab" data-toggle="tab">
+            Directory Tree
+          </a>
+        </li>
+        <li role="presentation">
+          <a id="nav-stack-btn" href="#nav-stack" aria-controls="nav-stack" role="tab" data-toggle="tab">
+            Nav Stack
+          </a>
+        </li>
+        <li role="presentation">
+          <a href="#search" aria-controls="search" role="tab" data-toggle="tab">
+            Search
+          </a>
+        </li>
+      </ul>
+
+      <div class="tab-content">
+        <div role="tabpanel" class="tab-pane active" id="directory">
+          <div id="directory-content"></div>
+        </div>
+        <div role="tabpanel" class="tab-pane" id="nav-stack">
+          <div data-bind="template: {
+                          name: 'nav-frame',
+                          foreach: navStack,
+                          afterAdd: scrollToBottom}"></div>
+        </div>
+        <div role="tabpanel" class="tab-pane" id="search">
+          <div><span data-bind="text: searchTerm"></span></div>
+          <div data-bind="foreach: searchResults">
+            <span data-bind="text: location"></span>
+            <span data-bind="text: code"></span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="right-column" data-bind="viewFrame: currentFrame"></div>
+
+    <script type="text/html" id="nav-frame"><div class="nav-frame">
+        <div class="frame-title">
+          <span data-bind="text: location"></span>
+          <div class="eject-frame-btn">
+            <span data-bind="click: $root.deleteFrame" class="glyphicon glyphicon-eject"></span>
+          </div>
+        </div>
+        <pre data-bind="html: excerpt" class="highlight">
+        </pre>
+    </div></script>
+
+    <script src="static/js/psb_source_view.js"></script>
+    <script src="static/js/psb.js"></script>
+  </body>
+</html>
