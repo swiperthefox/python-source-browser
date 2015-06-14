@@ -1,10 +1,11 @@
-var NavFrame = function(location, content) {
+var NavFrame = function(location, symbol, content) {
   var self = this;
   var excerptSize = 2;
   var items = location.split('#L-');
   this.lineNumber = (items.length>1)?parseInt(items[1]):0;
   this.location = location.replace(/.*?\/file\//, "");
   this.content = content;
+  this.symbol = symbol;
   function getLines(text, linenum, size) {
     if (linenum === 0) {
       // don't interested in a specific line
@@ -25,7 +26,7 @@ var NavFrame = function(location, content) {
 
 var PSBViewModel = function() {
   var self = this;
-  var EMPTYFRAME = new NavFrame("", "");
+  var EMPTYFRAME = new NavFrame("", "", "");
   this.navStack = ko.observableArray();
   this.currentFrame = ko.observable(EMPTYFRAME);
   this.searchResults = ko.observableArray();
@@ -37,19 +38,15 @@ var PSBViewModel = function() {
     showNavFramePane();
   };
 
-  this.clearAddNewFrame = function(url, file_content) {
-    self.navStack.splice(0);
-    self.addNewFrame(url, file_content);
-  };
-
-  this.addNewFrame = function(url, file_content) {
-    var newFrame = new NavFrame(url, file_content);
+  this.addNewFrame = function(url, symbol, file_content) {
+    var newFrame = new NavFrame(url, symbol, file_content);
     self.pushFrame(newFrame);
   };
 
-  // make sure the #nav-stack tab is shown. This could be a custom-binding,
-  // but no one has implemented it, so for now, we just manipulate the DOM
+  // make sure the #nav-stack tab is shown. There is no custom binding
+  // for bootstrap tabs, so for now, we just manipulate the DOM
   // directly.
+
   // TODO: Create a knockout custome binding for bootstrap tab
   function showNavFramePane() {
     $('#nav-stack-btn').tab('show');
@@ -73,6 +70,15 @@ var PSBViewModel = function() {
     } else {
       self.currentFrame(EMPTYFRAME);
     }
+  };
+
+  this.gotoDefinition = function(url, symbol, clearStack) {
+    if (clearStack) {
+      self.navStack.splice(0);
+    }
+    $.get(url, function(file_content) {
+      self.addNewFrame(url, symbol, file_content);
+    });
   };
 };
 
@@ -102,9 +108,7 @@ var PSBViewModel = function() {
   $('#directory-content').on('select_node.jstree', function(event, data) {
       if (data.node.type === 'file') {
         var url = data.node.a_attr.href;
-        $.get(url, function(file_content) {
-          psbViewModel.clearAddNewFrame(url, file_content);
-        });
+        psbViewModel.gotoDefinition(url, '', true);
       } else {
         data.instance.toggle_node(data.node);
       }

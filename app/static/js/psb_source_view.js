@@ -5,9 +5,7 @@ ko.bindingHandlers.viewFrame = {
       $(element).on('click', 'a', function(e) {
         var target = e.target;
         var url = target.href;
-        $.get(url, function(file_content) {
-          bindingContext.$root.addNewFrame(url, file_content);
-        });
+        bindingContext.$root.gotoDefinition(url, target.text, false);
         return false;
       });
     },
@@ -25,12 +23,19 @@ ko.bindingHandlers.viewFrame = {
       // set content
       element.innerHTML = valueUnwrapped.content;
 
-      // scroll to desired line
-      var lineId = "foo-" + valueUnwrapped.lineNumber;
-      var row = document.getElementById(lineId);
-      if (row) {
-        row.scrollIntoView();
-        row.style.background="#01c145";
+      // show the desired line.
+      // It seems that it's best to put the desired line near to the top of source view.
+      // so we will try to put it in the third line
+      var toplinenumber = Math.max(1, valueUnwrapped.lineNumber-3);
+      var toprow = getLineByIndex(toplinenumber);
+      if (toprow) {toprow.scrollIntoView();}
+
+      // highlight the desired line
+      var targetLine = getLineByIndex(valueUnwrapped.lineNumber);
+      if (targetLine) { targetLine.style.background = "#01c145"; }
+      function getLineByIndex(lineNumber) {
+        var lineid = "foo-" + lineNumber;
+        return document.getElementById(lineid);
       }
     }
 };

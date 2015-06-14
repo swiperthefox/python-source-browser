@@ -24,7 +24,7 @@
       }
       #right-column {
       width: 800px;
-      height: 700px;
+      height: 800px;
       margin-left: 40px;
       overflow-y: auto;
       }
@@ -44,7 +44,7 @@
       position: relative;
       width: 100%;
       }
-      .eject-frame-btn {
+      .frame-action-btns {
       position: absolute;
       right: 5px;
       display: inline-block;
@@ -105,8 +105,11 @@
 
     <script type="text/html" id="nav-frame"><div class="nav-frame">
         <div class="frame-title">
+          <span data-bind="text: symbol"></span>
+          @
           <span data-bind="text: location"></span>
-          <div class="eject-frame-btn">
+          <div class="frame-action-btns">
+            <span data-bind="click: $root.editNote" class="glyphicon glyphicon-pencil"></span>
             <span data-bind="click: $root.deleteFrame" class="glyphicon glyphicon-eject"></span>
           </div>
         </div>
