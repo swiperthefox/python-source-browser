@@ -105,6 +105,8 @@ var PSBViewModel = function() {
         $.get(url, function(file_content) {
           psbViewModel.clearAddNewFrame(url, file_content);
         });
+      } else {
+        data.instance.toggle_node(data.node);
       }
     });
   $("#nav-stack").on("click", ".nav-frame", function(e) {
