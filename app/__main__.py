@@ -24,7 +24,7 @@ PSBDATADIR = os.path.expanduser("~/.psb")
 app = Flask(__name__)
 
 app.config.from_object(__name__)
-source_conveter = None # will be set later
+source_conveter = None # will be set in config_app
 
 def get_db():
     """Opens a new database connection if there is none yet for the
@@ -67,30 +67,31 @@ def create_note():
 
 @app.route('/file/', defaults={'path': ''})
 @app.route('/file/<path:path>')
-def get_source(path):
+def get_source(path, use_cache=False):
     if path == '':
         return jsonify(list_dir(current_app.config['PROJECTROOT']))
-    if path.endswith('.py'):
-        psb_db = get_db()
-        result = psb_db.get_html(path)
-        if result is None:
-            result = source_conveter.pygmentize(path)
-            psb_db.save_html(path, result)
-        return result
-    else:
-        logging.info(app.config['PROJECTROOT'])
-        return send_from_directory(app.config['PROJECTROOT'], path)
+    psb_db = get_db()
+    result = psb_db.get_html(path)
+    if result is None or not use_cache:
+        result = source_conveter.pygmentize(path)
+        psb_db.save_html(path, result)
+    return result
+
+@app.route('/')
+def index():
+    print ("index")
+    return send_from_directory(os.path.dirname(__file__), 'index.html')
 
 def config_app(project_root):
     """Configuration based on the proejct_root"""
     rel_project_root = os.path.relpath(project_root)
     datadir = app.config['PSBDATADIR']
-    root_as_file_name = project_root.replace(os.path.sep, '_')
-    dbfile = os.path.join(datadir, 'databases', root_as_file_name + 'sqlite')
+    root_as_file_name = os.path.abspath(project_root).replace(os.path.sep, '_')
+    dbfile = os.path.join(datadir, 'databases', root_as_file_name + '.sqlite')
     tagsfile = os.path.join(datadir, 'tags', root_as_file_name + '.tags')
     config = {
         'DATABASE': dbfile,
-        'PROJECTROOT': project_root,
+        'PROJECTROOT': os.path.abspath(project_root),
         'TAGSFILE': tagsfile
     }
     app.config.update(config)

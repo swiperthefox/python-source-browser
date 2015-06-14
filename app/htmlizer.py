@@ -28,25 +28,37 @@ class SourceConverter:
         exit_code = os.system(cmd)
 
         if exit_code:
-            raise Ctags_Error("Failed to generate tags file using ctags. Please make sure that "
-                                "ctags is installed.")
+            raise Ctags_Error("Failed to generate tags file using ctags. Please make sure that"
+                                " ctags is installed.")
         else:
             shutil.move(tmp_tags, self.tagsfile)
 
-    def pygmentize(self, py_path):
+    def htmlize_python_file(self, full_path):
         """Generate syntax highlighted html source from python source file"""
         if not self.tags_generated:
             self.make_tags()
 
-        config = {'linenos': 'table',
-                'anchorlinenos': True,
-                'tagurlformat': '/%(path)s%(fname)s%(fext)s.html',
-                'tagsfile': self.tagsfile,
-                'lineanchors': 'L'}
+        config = {'linenos': 'inline',
+                  'anchorlinenos': True,
+                  'tagurlformat': '/file/%(path)s%(fname)s%(fext)s',
+                  'tagsfile': self.tagsfile,
+                  'lineanchors': 'L',
+                  'linespans': 'foo'}
         lexer = pygments.lexers.PythonLexer()
         formatter = pygments.formatters.HtmlFormatter(**config)
 
-        full_py_path = os.path.join(self.root, py_path)
-        with open(full_py_path) as pyfile:
+        with open(full_path) as pyfile:
             pycode = pyfile.read()
             return pygments.highlight(pycode, lexer, formatter)
+
+    def htmlize_plain_text(self, file_path):
+        with open(file_path) as fp:
+            lines = fp.readlines()
+            return "<br>".join(lines)
+
+    def pygmentize(self, path):
+        full_path = os.path.join(self.root, path)
+        if path.endswith('.py'):
+            return self.htmlize_python_file(full_path)
+        else:
+            return self.htmlize_plain_text(full_path)

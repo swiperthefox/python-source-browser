@@ -3,13 +3,14 @@ import os
 import tempfile
 import json
 
-from utils import HTMLTestMixin
+from utils import HTMLTestMixin, getFixtureDir
 from app import __main__ as main
 
 class PSBServerTestCase(TestCase, HTMLTestMixin):
 
     def setUp(self):
-        project_root = os.path.abspath('tests/fixtures/sample-dir')
+        project_root = getFixtureDir()
+        import logging; logging.info(project_root)
         main.config_app(project_root)
         main.app.config['TESTING'] = True
         self.app = main.app.test_client()
@@ -46,16 +47,19 @@ class PSBServerTestCase(TestCase, HTMLTestMixin):
         result = self.app.get('/file/dir1/file1')
         self.assertEqual("plain text file is not syntax highlighted.", result.data.strip())
 
+        multi_line_result = self.app.get('/file/dir1/multi_line')
+        self.assertEqual("first line\n<br>second line", multi_line_result.data.strip())
+
     def test_get_python_file(self):
         result = self.app.get('/file/f1_2.py')
         html_code = result.data
         self.check_link_for_symbol(html_code,
-                                   [("Test", "/dir2/f2_1.py.html#L-1"),
-                                    ("a", "/f1_1.py.html#L-1")])
+                                   [("Test", "/file/dir2/f2_1.py#L-1"),
+                                    ("a", "/file/f1_1.py#L-1")])
 
     def test_get_directory(self):
         result = self.app.get('/file/')
         print result.data
         dir_struct = json.loads(result.data)
-        self.assertEqual(dir_struct['name'], 'root')
+        self.assertEqual(dir_struct['text'], 'root')
         self.assertEqual(len(dir_struct['children']), 5)

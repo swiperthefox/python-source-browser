@@ -4,15 +4,15 @@
 
 To browse the sources of a project, we want to do:
 
-1. List the directory structure of the project, this will be a tree view (T),
+1. (done) List the directory structure of the project, this will be a tree view (T),
 
-2. Open a file (F) from the tree view T,
+2. (done) Open a file (F) from the tree view T,
 
 3. Search for a keyword.
 
    Since editing is not supported, we will use the "type to search" metaphor.
 
-4. Check the definition of a name by clicking it.
+4. (done)Check the definition of a name by clicking it.
 
    This can be done in two different ways:
 
@@ -20,7 +20,7 @@ To browse the sources of a project, we want to do:
 
    2. If the name is a function/class/module, open the related file and jump to the correspoding line
 
-5. See a trace of our navigation: why and how do we get to this point.
+5. (done)See a trace of our navigation: why and how do we get to this point.
 
    A call stack like view will be helpful for this.
 
@@ -47,13 +47,14 @@ To browse the sources of a project, we want to do:
 
 Will use a browser, using knockout js.
 
-* Define a tree compoenent for knockout js.
+* (done) Define a tree compoenent for knockout js.
 
     Some examples are floating in the internet, will use one of them as a starting point.
+    update: Using jstree for now.
 
 * A call stack view.
 
-* Handle the "click" event using our own function, to:
+* (done) Handle the "click" event using our own function, to:
 
     1. Get a chance to trace the links
 
