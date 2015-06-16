@@ -4,11 +4,12 @@ create table notes (
   id integer primary key autoincrement,
   location text not null,
   symbol text not null,
-  note text not null
+  note text not null,
+  CONSTRAINT loc_sym UNIQUE (location, symbol)
 );
 
 create table codes (
   id integer primary key autoincrement,
-  path text not null,
+  path text UNIQUE,
   htmlsource text not null
 );

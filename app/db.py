@@ -28,7 +28,7 @@ class PSBDatabase:
         return self.query_all("select location, symbol, note from notes")
 
     def add_note(self, note):
-        self.make_change("insert into notes(location, symbol, note) values (?,?,?)", note)
+        self.make_change("insert or replace into notes(location, symbol, note) values (?,?,?)", note)
 
     def save_html(self, path, html_code):
         self.make_change("insert into codes (path, htmlsource) values (?,?)", (path, html_code))
