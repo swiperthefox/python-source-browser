@@ -6,6 +6,10 @@ var NavFrame = function(location, symbol, content) {
   this.location = location.replace(/.*?\/file\//, "");
   this.content = content;
   this.symbol = symbol;
+
+  this.showNoteEditor = ko.observable(false);
+  this.editingNote = ko.observable('');
+
   function getLines(text, linenum, size) {
     if (linenum === 0) {
       // don't interested in a specific line
@@ -22,6 +26,25 @@ var NavFrame = function(location, symbol, content) {
   };
   this.excerpt = getLines(content, this.lineNumber, excerptSize);
   this.scrollTop = 0;
+
+  this.editNote = function(data, event) {
+    event.stopPropagation();
+    self.showNoteEditor(true);
+  };
+
+  this.cancelEdit = function(data, event) {
+    event.stopPropagation();
+    self.showNoteEditor(false);
+  };
+
+  this.saveEdit = function(data, event) {
+    event.stopPropagation();
+    var noteData = {location: self.location,
+                    symbol: self.symbol,
+                    note: self.editingNote()};
+    $.post("/notes", JSON.stringify(noteData), console.log, "json");
+    self.showNoteEditor(false);
+  };
 };
 
 var PSBViewModel = function() {

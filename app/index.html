@@ -49,6 +49,12 @@
       right: 5px;
       display: inline-block;
       }
+      div#noteEditor {
+      width: 400px;
+      }
+      div#noteEditor input {
+      width: 100%;
+      }
     </style>
   </head>
   <body>
@@ -102,22 +108,30 @@
     </div>
 
     <div id="right-column" data-bind="viewFrame: currentFrame"></div>
-
     <script type="text/html" id="nav-frame"><div class="nav-frame">
         <div class="frame-title">
           <span data-bind="text: symbol"></span>
           @
           <span data-bind="text: location"></span>
           <div class="frame-action-btns">
-            <span data-bind="click: $root.editNote" class="glyphicon glyphicon-pencil"></span>
+            <span data-bind="click: editNote" class="glyphicon glyphicon-pencil"></span>
             <span data-bind="click: $root.deleteFrame" class="glyphicon glyphicon-eject"></span>
+          </div>
+        </div>
+        <div id="noteEditor" data-bind="visible: showNoteEditor">
+          <input type="text" placeholder="Add your one line note here. (Enter to save)"
+                 data-bind="textInput: editingNote, hasFocus: showNoteEditor, enter: saveEdit">
+          <div class="btn-toolbar">
+            <button type="button" class="btn btn-default" data-bind="click: saveEdit">Save</button>
+            <button type="button" class="btn btn-default" data-bind="click: cancelEdit">Cancel</button>
           </div>
         </div>
         <pre data-bind="html: excerpt" class="highlight">
         </pre>
     </div></script>
 
-    <script src="static/js/psb_source_view.js"></script>
+    <script src="static/js/ko_viewFrame.js"></script>
+    <script src="static/js/ko_enter.js"></script>
     <script src="static/js/psb.js"></script>
   </body>
 </html>
