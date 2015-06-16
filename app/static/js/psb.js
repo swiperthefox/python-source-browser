@@ -9,6 +9,7 @@ var NavFrame = function(location, symbol, content) {
 
   this.showNoteEditor = ko.observable(false);
   this.editingNote = ko.observable('');
+  this.editingStatus = ko.observable('');
 
   function getLines(text, linenum, size) {
     if (linenum === 0) {
@@ -42,7 +43,13 @@ var NavFrame = function(location, symbol, content) {
     var noteData = {location: self.location,
                     symbol: self.symbol,
                     note: self.editingNote()};
-    $.post("/notes", JSON.stringify(noteData), console.log, "json");
+    $.post("/notes", JSON.stringify(noteData),
+           function(data, textStatus) {
+             alert(data);
+             console.log(textStatus);
+             var status = (data==='ok')?"green":"red";
+             self.editingStatus(status);
+           });
     self.showNoteEditor(false);
   };
 };

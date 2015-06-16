@@ -114,7 +114,8 @@
           @
           <span data-bind="text: location"></span>
           <div class="frame-action-btns">
-            <span data-bind="click: editNote" class="glyphicon glyphicon-pencil"></span>
+            <span class="glyphicon glyphicon-pencil"
+                  data-bind="click: editNote, style: {color: editingStatus}"></span>
             <span data-bind="click: $root.deleteFrame" class="glyphicon glyphicon-eject"></span>
           </div>
         </div>
