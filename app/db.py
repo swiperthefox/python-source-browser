@@ -23,7 +23,7 @@ class PSBDatabase:
     def make_change(self, *change):
         with self.connection:
             self.connection.execute(*change)
-
+            self.connection.commit()
     def get_notes(self):
         return self.query_all("select location, symbol, note from notes")
 
