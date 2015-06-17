@@ -4,15 +4,22 @@
     <meta charset="UTF-8">
     <title>title</title>
     <style type="text/css">
+      html {
+      position: absolute;
+      top: 10px;
+      bottom: 10px;
+      }
+      body {
+      height: 100%;
+      }
       #left-column, #right-column {
-      display: inline-block;
-      margin-top: 20px;
+      display: inline-flex;
+      height: 100%;
+      flex-direction: column;
       }
       #left-column {
-      position: sticky;
       width: 600px;
       margin-left: 20px;
-      margin-top: 20px;
       vertical-align: top;
       }
       .single-unit {
@@ -24,12 +31,10 @@
       }
       #right-column {
       width: 800px;
-      height: 800px;
       margin-left: 40px;
-      overflow-y: auto;
       }
       .nav-frame {
-      margin: 5px 10px;
+      margin: 5px 0px;
       border-radius: 6px 6px 6px 6px;
       -moz-border-radius: 6px 6px 6px 6px;
       -webkit-border-radius: 6px 6px 6px 6px;
@@ -37,8 +42,13 @@
       background: #f2c66d;
       }
       .tab-content {
-      height: 700px;
+      flex: 1;
+      width: 100%;
       overflow-y: auto;
+      }
+      #main-source {
+      flex: 1;
+      overflow: auto;
       }
       .frame-title {
       position: relative;
@@ -58,6 +68,9 @@
       .hl_line {
       background-color: #9af99c;
       }
+      .active-frame {
+      background-color: #ffe68d;
+      }
     </style>
   </head>
   <body>
@@ -74,7 +87,7 @@
     <div id="left-column" class="nav nav-tabs">
       <ul class="nav nav-tabs" role="tablist" id="myTab">
         <li role="presentation" class="active">
-          <a href="#directory" aria-controls="directory" role="tab" data-toggle="tab">
+          <a id="directory-btn" href="#directory" aria-controls="directory" role="tab" data-toggle="tab">
             Directory Tree
           </a>
         </li>
@@ -98,7 +111,8 @@
           <div data-bind="template: {
                           name: 'nav-frame',
                           foreach: navStack,
-                          afterAdd: scrollToBottom}"></div>
+                          afterAdd: setupNewFrame}">
+          </div>
         </div>
         <div role="tabpanel" class="tab-pane" id="search">
           <div><span data-bind="text: searchTerm"></span></div>
@@ -111,9 +125,9 @@
     </div>
 
     <div id="right-column">
-      <pre data-bind="viewFrame: currentFrame" class="highlight"></pre>
+      <pre id="main-source" data-bind="viewFrame: currentFrame" class="highlight"></pre>
     </div>
-    <script type="text/html" id="nav-frame"><div class="nav-frame">
+    <script type="text/html" id="nav-frame"><div class="nav-frame" data-bind="css: {'active-frame': isCurrentFrame}">
         <div class="frame-title">
           <span data-bind="text: symbol"></span>
           @
@@ -132,8 +146,7 @@
             <button type="button" class="btn btn-default" data-bind="click: cancelEdit">Cancel</button>
           </div>
         </div>
-        <pre data-bind="html: excerpt" class="highlight">
-        </pre>
+        <pre data-bind="html: excerpt" class="highlight"></pre>
     </div></script>
 
     <script src="static/js/ko_viewFrame.js"></script>

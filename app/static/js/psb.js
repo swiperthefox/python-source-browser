@@ -2,15 +2,13 @@ var NavFrame = function(location, symbol, content) {
   var self = this;
   var excerptSize = 2;
   var items = location.split('#L-');
+
+  // code content of the frame
   this.lineNumber = (items.length>1)?parseInt(items[1]):0;
   this.location = location.replace(/.*?\/file\//, "");
   var idRegexp = new RegExp('("foo-' + this.lineNumber + '")');
   this.content = content.replace(idRegexp, '$1 class="hl_line"');
   this.symbol = symbol;
-
-  this.showNoteEditor = ko.observable(false);
-  this.editingNote = ko.observable('');
-  this.editingStatus = ko.observable('');
 
   function getLines(text, linenum, size) {
     if (linenum === 0) {
@@ -26,6 +24,15 @@ var NavFrame = function(location, symbol, content) {
     return excerptLines.join('<br>');
   };
   this.excerpt = getLines(this.content, this.lineNumber, excerptSize);
+
+  // note editor for the symbol represented by this frame
+  this.showNoteEditor = ko.observable(false);
+  this.editingNote = ko.observable('');
+  this.editingStatus = ko.observable('');
+
+  // bookkeeping for UI representation
+  this.isCurrentFrame = ko.observable(true);
+
   this.scrollTop = 0;
 
   this.editNote = function(data, event) {
@@ -45,8 +52,6 @@ var NavFrame = function(location, symbol, content) {
                     note: self.editingNote()};
     $.post("/notes", JSON.stringify(noteData),
            function(data, textStatus) {
-             alert(data);
-             console.log(textStatus);
              var status = (data==='ok')?"green":"red";
              self.editingStatus(status);
            });
@@ -56,15 +61,24 @@ var NavFrame = function(location, symbol, content) {
 
 var PSBViewModel = function() {
   var self = this;
-  var EMPTYFRAME = new NavFrame("", "", "");
+  var EMPTYFRAME = new NavFrame("", "", "To start browse, choose a file from "
+                                        + "the directory tree on the left side.");
   this.navStack = ko.observableArray();
   this.currentFrame = ko.observable(EMPTYFRAME);
   this.searchResults = ko.observableArray();
   this.searchTerm = ko.observable('');
 
+  this.setCurrentFrame = function(newFrame) {
+    if (self.currentFrame() != newFrame) {
+      self.currentFrame().isCurrentFrame(false);
+      newFrame.isCurrentFrame(true);
+      self.currentFrame(newFrame);
+    }
+  };
+
   this.pushFrame = function(navFrame) {
     self.navStack.push(navFrame);
-    self.currentFrame(navFrame);
+    self.setCurrentFrame(navFrame);
     showNavFramePane();
   };
 
@@ -82,12 +96,23 @@ var PSBViewModel = function() {
     $('#nav-stack-btn').tab('show');
   };
 
-  this.scrollToBottom = function(domNode, i, data) {
-    domNode.scrollIntoView();
+  function showDirectoryTree() {
+    $('#directory-btn').tab('show');
+  };
+
+  this.setupNewFrame = function(domNode, i, data) {
+    var p = document.getElementById('nav-stack').parentElement;
+    var isOffScreen = p.clientHeight < p.scrollHeight;
+    if (isOffScreen) {
+      domNode.scrollIntoView();
+    };
+
+    // add event listener for click
+    $(domNode).on('click', 'a', self.symbolClickHandler);
   };
 
   this.showFrame = function(navFrame) {
-    self.currentFrame(navFrame);
+    self.setCurrentFrame(navFrame);
   };
 
   this.deleteFrame = function(value) {
@@ -95,10 +120,10 @@ var PSBViewModel = function() {
     if (idx != -1) {
       self.navStack.splice(idx);
     }
-    if (idx > 0) {
-      self.currentFrame(self.navStack()[idx-1]);
-    } else {
-      self.currentFrame(EMPTYFRAME);
+    var lastFrame = (idx>0) ? self.navStack()[idx-1] : EMPTYFRAME;
+    self.setCurrentFrame(lastFrame);
+    if (idx<=0) {
+      showDirectoryTree();
     }
   };
 
@@ -110,7 +135,17 @@ var PSBViewModel = function() {
       self.addNewFrame(url, symbol, file_content);
     });
   };
+
+  // wrap gotoDefinition into an event wrapper
+  this.symbolClickHandler = function(e) {
+    var target = e.target;
+    var url = target.href;
+    psbViewModel.gotoDefinition(url, target.text, false);
+    return false;
+  };
 };
+
+var psbViewModel = new PSBViewModel();
 
 (function setup() {
   $.ajaxPrefilter(function( options, originalOptions, jqXHR ) {
@@ -147,9 +182,8 @@ var PSBViewModel = function() {
     var target = e.target;
     psbViewModel.showFrame(ko.dataFor(target));
   });
+  $("pre.highlight").on('click', 'a', psbViewModel.symbolClickHandler);
+
 })();
-
-
-var psbViewModel = new PSBViewModel();
 
 ko.applyBindings(psbViewModel);
