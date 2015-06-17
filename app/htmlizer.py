@@ -11,11 +11,28 @@ import shutil
 class Ctags_Error(Exception):
     pass
 
+class CodeHtmlFormatter(pygments.formatters.HtmlFormatter):
+    def wrap(self, source, outfile):
+        return self._wrap_code(source)
+
+    def _wrap_code(self, source):
+        for i, t in source:
+            if i == 1:
+                # it's a line of formatted code
+                t += '<br>'
+            yield i, t
+
 class SourceConverter:
     def __init__(self, root, tagsfile):
         self.root = root
         self.tagsfile = tagsfile
         self.tags_generated = False
+        self._findex = 0
+
+    @property
+    def findex(self):
+        self._findex += 1
+        return self._findex
 
     def make_tags(self):
         # we want all file paths in tags file is relative to the root
@@ -43,9 +60,11 @@ class SourceConverter:
                   'tagurlformat': '/file/%(path)s%(fname)s%(fext)s',
                   'tagsfile': self.tagsfile,
                   'lineanchors': 'L',
-                  'linespans': 'foo'}
+                  'linespans': 'foo',
+                  'lineseparator':''}
+
         lexer = pygments.lexers.PythonLexer()
-        formatter = pygments.formatters.HtmlFormatter(**config)
+        formatter = CodeHtmlFormatter(**config)
 
         with open(full_path) as pyfile:
             pycode = pyfile.read()

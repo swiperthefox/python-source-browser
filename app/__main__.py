@@ -70,11 +70,14 @@ def create_note():
 def get_source(path, use_cache=False):
     if path == '':
         return jsonify(list_dir(current_app.config['PROJECTROOT']))
-    psb_db = get_db()
-    result = psb_db.get_html(path)
-    if result is None or not use_cache:
+    if use_cache:
+        psb_db = get_db()
+        result = psb_db.get_html(path)
+        if result is None:
+            result = source_conveter.pygmentize(path)
+            psb_db.save_html(path, result)
+    else:
         result = source_conveter.pygmentize(path)
-        psb_db.save_html(path, result)
     return result
 
 @app.route('/')

@@ -30,9 +30,11 @@ ko.bindingHandlers.viewFrame = {
       var toprow = getLineByIndex(toplinenumber);
       if (toprow) {toprow.scrollIntoView();}
 
-      // highlight the desired line
-      var targetLine = getLineByIndex(valueUnwrapped.lineNumber);
-      if (targetLine) { targetLine.style.background = "#01c145"; }
+      // ko's visible binding assumes an observable for binding value, so as a workaround, a
+      // function expression is used instead of a boolean value.
+      // Opened an issue in knockout's github project page.
+      ko.bindingHandlers.visible.update(element, function() {return element.innerHTML != '';});
+
       function getLineByIndex(lineNumber) {
         var lineid = "foo-" + lineNumber;
         return document.getElementById(lineid);

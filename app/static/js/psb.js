@@ -4,7 +4,8 @@ var NavFrame = function(location, symbol, content) {
   var items = location.split('#L-');
   this.lineNumber = (items.length>1)?parseInt(items[1]):0;
   this.location = location.replace(/.*?\/file\//, "");
-  this.content = content;
+  var idRegexp = new RegExp('("foo-' + this.lineNumber + '")');
+  this.content = content.replace(idRegexp, '$1 class="hl_line"');
   this.symbol = symbol;
 
   this.showNoteEditor = ko.observable(false);
@@ -16,16 +17,15 @@ var NavFrame = function(location, symbol, content) {
       // don't interested in a specific line
       return "";
     }
-    text = text.substring(28, text.length-13);
-    var lines = text.split('\n');
+    var lines = text.split('<br>');
     var windowSize = 1+2*size;
     var lineStart = linenum - size;
     lineStart = Math.min(lines.length - windowSize, lineStart);
     lineStart = Math.max(0, lineStart);
-    var segment =  lines.slice(lineStart, lineStart + windowSize).join('\n');
-    return segment.replace(/foo/g, "excerpt");
+    var excerptLines = lines.slice(lineStart, lineStart + windowSize);
+    return excerptLines.join('<br>');
   };
-  this.excerpt = getLines(content, this.lineNumber, excerptSize);
+  this.excerpt = getLines(this.content, this.lineNumber, excerptSize);
   this.scrollTop = 0;
 
   this.editNote = function(data, event) {
