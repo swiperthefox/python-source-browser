@@ -131,10 +131,10 @@
         <div class="frame-title">
           <span data-bind="text: symbol"></span>
           @
-          <span data-bind="text: location"></span>
+          <span data-bind="text: realFileName"></span>
           <div class="frame-action-btns">
             <span class="glyphicon glyphicon-pencil"
-                  data-bind="click: editNote, style: {color: editingStatus}"></span>
+                  data-bind="click: editNote, style: {color: editingStatus}, visible: symbol"></span>
             <span data-bind="click: $root.deleteFrame" class="glyphicon glyphicon-eject"></span>
           </div>
         </div>

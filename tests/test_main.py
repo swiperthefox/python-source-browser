@@ -30,7 +30,8 @@ class PSBServerTestCase(TestCase, HTMLTestMixin):
             "location":"file1.py#L-2",
             "symbol":"A",
             "note":"a note"}), content_type="application/json")
-        self.assertEqual('ok', result.data)
+        expected = {'data': [["file1.py#L-2", "A", "a note"]]}
+        self.assertEqual(expected, json.loads(result.data))
 
     def test_get_notes(self):
         datas = map(json.dumps,  [{

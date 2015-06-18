@@ -1,11 +1,12 @@
-var NavFrame = function(location, symbol, content) {
+var NavFrame = function(location, symbol, content, note) {
   var self = this;
   var excerptSize = 2;
   var items = location.split('#L-');
 
   // code content of the frame
   this.lineNumber = (items.length>1)?parseInt(items[1]):0;
-  this.location = location.replace(/.*?\/file\//, "");
+  this.location = location;
+  this.realFileName = location.substring(6);
   var idRegexp = new RegExp('("foo-' + this.lineNumber + '")');
   this.content = content.replace(idRegexp, '$1 class="hl_line"');
   this.symbol = symbol;
@@ -27,7 +28,7 @@ var NavFrame = function(location, symbol, content) {
 
   // note editor for the symbol represented by this frame
   this.showNoteEditor = ko.observable(false);
-  this.editingNote = ko.observable('');
+  this.editingNote = ko.observable(note);
   this.editingStatus = ko.observable('');
 
   // bookkeeping for UI representation
@@ -52,11 +53,43 @@ var NavFrame = function(location, symbol, content) {
                     note: self.editingNote()};
     $.post("/notes", JSON.stringify(noteData),
            function(data, textStatus) {
-             var status = (data==='ok')?"green":"red";
+             var status = (textStatus==='success')?"green":"red";
              self.editingStatus(status);
+             psbViewModel.noteList.setNotes(data['data']);
            });
     self.showNoteEditor(false);
   };
+};
+
+var NoteList = function() {
+  var self = this;
+  this.noteList = [];
+
+  this.getNotes = function getNotes() {
+    $.getJSON("/notes", function(data) {
+      self.setNotes(data.data);
+    });
+  };
+
+  this.setNotes = function setNotes(data) {
+    self.noteList = ko.utils.arrayMap(data, function(item) {
+      return {'location': item[0],
+              'symbol': item[1],
+              'note': item[2]};
+    });
+  };
+
+  this.lookup = function lookup(symbol, location) {
+    var i;
+    for (i=0; i<self.noteList.length; ++i) {
+      var note = self.noteList[i];
+      if (symbol == note.symbol && location == note.location) {
+        return note.note;
+      }
+    }
+    return '';
+  };
+  this.getNotes();
 };
 
 var PSBViewModel = function() {
@@ -67,6 +100,7 @@ var PSBViewModel = function() {
   this.currentFrame = ko.observable(EMPTYFRAME);
   this.searchResults = ko.observableArray();
   this.searchTerm = ko.observable('');
+  this.noteList = new NoteList();
 
   this.setCurrentFrame = function(newFrame) {
     if (self.currentFrame() != newFrame) {
@@ -83,7 +117,8 @@ var PSBViewModel = function() {
   };
 
   this.addNewFrame = function(url, symbol, file_content) {
-    var newFrame = new NavFrame(url, symbol, file_content);
+    var note = self.noteList.lookup(symbol, url);
+    var newFrame = new NavFrame(url, symbol, file_content, note);
     self.pushFrame(newFrame);
   };
 
@@ -136,12 +171,28 @@ var PSBViewModel = function() {
     });
   };
 
-  // wrap gotoDefinition into an event wrapper
+  // wrap gotoDefinition into an event handler
   this.symbolClickHandler = function(e) {
     var target = e.target;
-    var url = target.href;
+    var url = target.getAttribute('href');
     psbViewModel.gotoDefinition(url, target.text, false);
     return false;
+  };
+
+  this.showNote = function(e) {
+    var target = e.target;
+    var symbol = target.text;
+    if (symbol.length == 0) {
+      // don't have text content means it doesn't represent a symbol
+      return true;
+    }
+    // lookup this symbol, and save the result to this node
+    var location = target.getAttribute('href');
+    var note = self.noteList.lookup(symbol, location);
+    if (note.length > 0) {
+      target.title = note;
+    }
+    return true;
   };
 };
 
@@ -183,6 +234,7 @@ var psbViewModel = new PSBViewModel();
     psbViewModel.showFrame(ko.dataFor(target));
   });
   $("pre.highlight").on('click', 'a', psbViewModel.symbolClickHandler);
+  $('pre.highlight').on('mouseenter', 'a', psbViewModel.showNote);
 
 })();
 

@@ -63,7 +63,8 @@ def create_note():
     psb_db = get_db()
     data = request.get_json(force=True)
     psb_db.add_note([data[key] for key in ('location', 'symbol', 'note')])
-    return "ok"
+    newNoteList = psb_db.get_notes()
+    return jsonify(data=newNoteList)
 
 @app.route('/file/', defaults={'path': ''})
 @app.route('/file/<path:path>')
