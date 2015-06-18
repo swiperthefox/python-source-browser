@@ -2,76 +2,7 @@
 <html>
   <head>
     <meta charset="UTF-8">
-    <title>title</title>
-    <style type="text/css">
-      html {
-      position: absolute;
-      top: 10px;
-      bottom: 10px;
-      }
-      body {
-      height: 100%;
-      }
-      #left-column, #right-column {
-      display: inline-flex;
-      height: 100%;
-      flex-direction: column;
-      }
-      #left-column {
-      width: 600px;
-      margin-left: 20px;
-      vertical-align: top;
-      }
-      .single-unit {
-      border-radius: 12px 12px 12px 12px;
-      -moz-border-radius: 12px 12px 12px 12px;
-      -webkit-border-radius: 12px 12px 12px 12px;
-      border: 0px solid #000000;
-      background: #f2c66d;
-      }
-      #right-column {
-      width: 800px;
-      margin-left: 40px;
-      }
-      .nav-frame {
-      margin: 5px 0px;
-      border-radius: 6px 6px 6px 6px;
-      -moz-border-radius: 6px 6px 6px 6px;
-      -webkit-border-radius: 6px 6px 6px 6px;
-      border: 0px solid #000000;
-      background: #f2c66d;
-      }
-      .tab-content {
-      flex: 1;
-      width: 100%;
-      overflow-y: auto;
-      }
-      #main-source {
-      flex: 1;
-      overflow: auto;
-      }
-      .frame-title {
-      position: relative;
-      width: 100%;
-      }
-      .frame-action-btns {
-      position: absolute;
-      right: 5px;
-      display: inline-block;
-      }
-      div#noteEditor {
-      width: 400px;
-      }
-      div#noteEditor input {
-      width: 100%;
-      }
-      .hl_line {
-      background-color: #9af99c;
-      }
-      .active-frame {
-      background-color: #ffe68d;
-      }
-    </style>
+    <title>Python Source Browser</title>
   </head>
   <body>
     <script src="/static/js/lib/jquery-2.1.4.min.js"></script>
@@ -83,6 +14,7 @@
     <script src="/static/js/lib/bootstrap.min.js"></script>
     <script src="/static/js/lib/knockout-3.3.0.js"></script>
     <link rel="stylesheet" href="/static/css/pastie.css" />
+    <link rel="stylesheet" href="/static/css/psb.css">
 
     <div id="left-column" class="nav nav-tabs">
       <ul class="nav nav-tabs" role="tablist" id="myTab">
@@ -127,6 +59,7 @@
     <div id="right-column">
       <pre id="main-source" data-bind="viewFrame: currentFrame" class="highlight"></pre>
     </div>
+
     <script type="text/html" id="nav-frame"><div class="nav-frame" data-bind="css: {'active-frame': isCurrentFrame}">
         <div class="frame-title">
           <span data-bind="text: symbol"></span>
@@ -138,13 +71,10 @@
             <span data-bind="click: $root.deleteFrame" class="glyphicon glyphicon-eject"></span>
           </div>
         </div>
-        <div id="noteEditor" data-bind="visible: showNoteEditor">
+        <div class="noteEditor" data-bind="visible: showNoteEditor">
           <input type="text" placeholder="Add your one line note here. (Enter to save)"
                  data-bind="textInput: editingNote, hasFocus: showNoteEditor, enter: saveEdit">
-          <div class="btn-toolbar">
-            <button type="button" class="btn btn-default" data-bind="click: saveEdit">Save</button>
-            <button type="button" class="btn btn-default" data-bind="click: cancelEdit">Cancel</button>
-          </div>
+          (Enter to save, Tab to cancel)
         </div>
         <pre data-bind="html: excerpt" class="highlight"></pre>
     </div></script>

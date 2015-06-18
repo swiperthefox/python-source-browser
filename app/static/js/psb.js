@@ -144,10 +144,7 @@ var PSBViewModel = function() {
 
     // add event listener for click
     $(domNode).on('click', 'a', self.symbolClickHandler);
-  };
-
-  this.showFrame = function(navFrame) {
-    self.setCurrentFrame(navFrame);
+    $(domNode).on('mouseenter', 'a', self.showNote);
   };
 
   this.deleteFrame = function(value) {
@@ -231,7 +228,7 @@ var psbViewModel = new PSBViewModel();
     });
   $("#nav-stack").on("click", ".nav-frame", function(e) {
     var target = e.target;
-    psbViewModel.showFrame(ko.dataFor(target));
+    psbViewModel.setCurrentFrame(ko.dataFor(target));
   });
   $("pre.highlight").on('click', 'a', psbViewModel.symbolClickHandler);
   $('pre.highlight').on('mouseenter', 'a', psbViewModel.showNote);

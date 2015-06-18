@@ -6,6 +6,7 @@ from __future__ import (
 import os
 import errno
 import logging
+import argparse
 
 from flask import Flask, request, jsonify, g, current_app, send_from_directory
 
@@ -115,16 +116,25 @@ def config_app(project_root):
     global source_conveter
     source_conveter = SourceConverter(rel_project_root, app.config['TAGSFILE'])
 
+def make_argparser():
+    parser = argparse.ArgumentParser(description="Browse the source code in given directory.")
+    parser.add_argument('-p', '--port', default=9999, type=int, help="The port to be used.")
+    parser.add_argument("project_root", help="The root directory of the project")
+    return parser
+
 if __name__ == '__main__':
     import sys
     import webbrowser
     import threading
-    import random
-    project_root = sys.argv[1]
+
+    args = make_argparser().parse_args()
+
+    port = args.port
+    url = "http://localhost:%d" % port
+
+    project_root = args.project_root
     config_app(project_root)
 
-    port = random.randint(12345, 13456)
-    url = "http://localhost:%d" % port
     # wait for 1 second so that the server can start
     threading.Timer(1, lambda: webbrowser.open(url, autoraise=True)).start()
 
