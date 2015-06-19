@@ -96,80 +96,36 @@ var NoteList = function() {
   };
   this.getNotes();
 };
+var SearchViewModel = function() {
+  this.searchResults = ko.observableArray();
+  this.searchTerm = ko.observable('');
+};
 
 var PSBViewModel = function() {
   var self = this;
-  var EMPTYFRAME = new NavFrame("", "", "To start browse, choose a file from "
-                                        + "the directory tree on the left side.");
-  this.navStack = ko.observableArray();
-  this.currentFrame = ko.observable(EMPTYFRAME);
-  this.searchResults = ko.observableArray();
-  this.searchTerm = ko.observable('');
   this.noteList = new NoteList();
-
-  this.setCurrentFrame = function(newFrame) {
-    if (self.currentFrame() != newFrame) {
-      self.currentFrame().isCurrentFrame(false);
-      newFrame.isCurrentFrame(true);
-      self.currentFrame(newFrame);
-    }
-  };
-
-  this.pushFrame = function(navFrame) {
-    self.navStack.push(navFrame);
-    self.setCurrentFrame(navFrame);
-    showNavFramePane();
-  };
-
-  this.addNewFrame = function(url, symbol, file_content) {
-    var note = self.noteList.lookup(symbol, url);
-    var newFrame = new NavFrame(url, symbol, file_content, note);
-    self.pushFrame(newFrame);
-  };
+  this.navStackViewModel = new NavStackViewModel();
+  this.searchViewModel = new SearchViewModel();
 
   // make sure the #nav-stack tab is shown. There is no custom binding
   // for bootstrap tabs, so for now, we just manipulate the DOM
   // directly.
 
   // TODO: Create a knockout custome binding for bootstrap tab
-  function showNavFramePane() {
+  this.showNavFramePane = function () {
     $('#nav-stack-btn').tab('show');
   };
 
-  function showDirectoryTree() {
+  this.showDirectoryTree = function () {
     $('#directory-btn').tab('show');
   };
 
-  this.setupNewFrame = function(domNode, i, data) {
-    var p = document.getElementById('nav-stack').parentElement;
-    var isOffScreen = p.clientHeight < p.scrollHeight;
-    if (isOffScreen) {
-      domNode.scrollIntoView();
-    };
-
-    // add event listener for click
-    $(domNode).on('click', 'a', self.symbolClickHandler);
-    $(domNode).on('mouseenter', 'a', self.showNote);
-  };
-
-  this.deleteFrame = function(value) {
-    var idx = self.navStack.indexOf(value);
-    if (idx != -1) {
-      self.navStack.splice(idx);
-    }
-    var lastFrame = (idx>0) ? self.navStack()[idx-1] : EMPTYFRAME;
-    self.setCurrentFrame(lastFrame);
-    if (idx<=0) {
-      showDirectoryTree();
-    }
-  };
-
   this.gotoDefinition = function(url, symbol, clearStack) {
-    if (clearStack) {
-      self.navStack.splice(0);
-    }
     $.get(url, function(file_content) {
-      self.addNewFrame(url, symbol, file_content);
+      var note = self.noteList.lookup(url, symbol);
+      var newFrame = new NavFrame(url, symbol, file_content, note);
+      self.navStackViewModel.addNewFrame(newFrame, clearStack);
+      self.showNavFramePane();
     });
   };
 
@@ -177,7 +133,7 @@ var PSBViewModel = function() {
   this.symbolClickHandler = function(e) {
     var target = e.target;
     var url = target.getAttribute('href');
-    psbViewModel.gotoDefinition(url, target.text, false);
+    self.gotoDefinition(url, target.text, false);
     return false;
   };
 
@@ -197,6 +153,41 @@ var PSBViewModel = function() {
       target.title = '';
     }
     return true;
+  };
+};
+var NavStackViewModel = function() {
+  var self = this;
+  var EMPTYFRAME = new NavFrame("", "", "To start browse, choose a file from "
+                                        + "the directory tree on the left side.");
+  this.navStack = ko.observableArray();
+  this.currentFrame = ko.observable(EMPTYFRAME);
+
+  this.setCurrentFrame = function(newFrame) {
+    if (self.currentFrame() != newFrame) {
+      self.currentFrame().isCurrentFrame(false);
+      newFrame.isCurrentFrame(true);
+      self.currentFrame(newFrame);
+    }
+  };
+
+  this.addNewFrame = function(newFrame, clearStack) {
+    if (clearStack) {
+      self.navStack.splice(0);
+    }
+    self.navStack.push(newFrame);
+    self.setCurrentFrame(newFrame);
+  };
+
+  this.deleteFrame = function(value) {
+    var idx = self.navStack.indexOf(value);
+    if (idx != -1) {
+      self.navStack.splice(idx);
+    }
+    var lastFrame = (idx>0) ? self.navStack()[idx-1] : EMPTYFRAME;
+    self.setCurrentFrame(lastFrame);
+    if (idx<=0) {
+      psbViewModel.showDirectoryTree();
+    }
   };
 };
 
@@ -225,6 +216,7 @@ var psbViewModel = new PSBViewModel();
       $('#directory-content').jstree('open_node', '#root');
     });
   });
+
   $('#directory-content').on('select_node.jstree', function(event, data) {
       if (data.node.type === 'file') {
         var url = data.node.a_attr.href;
@@ -233,13 +225,6 @@ var psbViewModel = new PSBViewModel();
         data.instance.toggle_node(data.node);
       }
     });
-  $("#nav-stack").on("click", ".nav-frame", function(e) {
-    var target = e.target;
-    psbViewModel.setCurrentFrame(ko.dataFor(target));
-  });
-  $("pre.highlight").on('click', 'a', psbViewModel.symbolClickHandler);
-  $('pre.highlight').on('mouseenter', 'a', psbViewModel.showNote);
-
 })();
 
 ko.applyBindings(psbViewModel);

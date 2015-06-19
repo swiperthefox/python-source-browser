@@ -39,14 +39,32 @@
         <div role="tabpanel" class="tab-pane active" id="directory">
           <div id="directory-content"></div>
         </div>
-        <div role="tabpanel" class="tab-pane" id="nav-stack">
-          <div data-bind="template: {
-                          name: 'nav-frame',
-                          foreach: navStack,
-                          afterAdd: setupNewFrame}">
+        <div role="tabpanel" class="tab-pane" id="nav-stack" data-bind="with: navStackViewModel">
+          <!-- ko foreach: navStack -->
+          <div class="nav-frame" data-bind="css: {'active-frame': isCurrentFrame},
+                                            click: $parent.setCurrentFrame">
+            <div class="frame-title">
+              <span data-bind="text: symbol"></span>
+              @
+              <span data-bind="text: realFileName"></span>
+              <div class="frame-action-btns">
+                <span class="glyphicon glyphicon-pencil"
+                      data-bind="click: editNote, style: {color: editingStatus}, visible: symbol"></span>
+                <span data-bind="click: $parent.deleteFrame" class="glyphicon glyphicon-eject"></span>
+              </div>
+            </div>
+            <div class="noteEditor" data-bind="visible: showNoteEditor">
+              <input type="text" placeholder="Add your one line note here. (Enter to save)"
+                     data-bind="textInput: editingNote, hasFocus: showNoteEditor,
+                                selected: showNoteEditor, enter: saveEdit">
+              (Enter to save, Tab to cancel)
+            </div>
+            <pre data-bind="sourceView: excerpt, stayInView: true" class="highlight"></pre>
           </div>
+          <!-- /ko -->
+
         </div>
-        <div role="tabpanel" class="tab-pane" id="search">
+        <div role="tabpanel" class="tab-pane" id="search" data-bind="with: searchViewModel">
           <div><span data-bind="text: searchTerm"></span></div>
           <div data-bind="foreach: searchResults">
             <span data-bind="text: location"></span>
@@ -57,31 +75,13 @@
     </div>
 
     <div id="right-column">
-      <pre id="main-source" data-bind="viewFrame: currentFrame" class="highlight"></pre>
+      <pre id="main-source" data-bind="sourceView: navStackViewModel.currentFrame().content" class="highlight"></pre>
     </div>
 
-    <script type="text/html" id="nav-frame"><div class="nav-frame" data-bind="css: {'active-frame': isCurrentFrame}">
-        <div class="frame-title">
-          <span data-bind="text: symbol"></span>
-          @
-          <span data-bind="text: realFileName"></span>
-          <div class="frame-action-btns">
-            <span class="glyphicon glyphicon-pencil"
-                  data-bind="click: editNote, style: {color: editingStatus}, visible: symbol"></span>
-            <span data-bind="click: $root.deleteFrame" class="glyphicon glyphicon-eject"></span>
-          </div>
-        </div>
-        <div class="noteEditor" data-bind="visible: showNoteEditor">
-          <input type="text" placeholder="Add your one line note here. (Enter to save)"
-                 data-bind="textInput: editingNote, hasFocus: showNoteEditor, selected: showNoteEditor, enter: saveEdit">
-          (Enter to save, Tab to cancel)
-        </div>
-        <pre data-bind="html: excerpt" class="highlight"></pre>
-    </div></script>
-
-    <script src="static/js/ko_viewFrame.js"></script>
+    <script src="static/js/ko_sourceView.js"></script>
     <script src="static/js/ko_enter.js"></script>
     <script src="static/js/ko_selected.js"></script>
+    <script src="static/js/ko_stayInView.js"></script>
     <script src="static/js/psb.js"></script>
   </body>
 </html>
