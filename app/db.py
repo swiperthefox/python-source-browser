@@ -28,7 +28,11 @@ class PSBDatabase:
         return self.query_all("select location, symbol, note from notes")
 
     def add_note(self, note):
-        self.make_change("insert or replace into notes(location, symbol, note) values (?,?,?)", note)
+        note_content = note[2]
+        if note_content == '':
+            self.make_change("delete from notes where location=? and symbol=?", (note[0], note[1]))
+        else:
+            self.make_change("insert or replace into notes(location, symbol, note) values (?,?,?)", note)
 
     def save_html(self, path, html_code):
         self.make_change("insert into codes (path, htmlsource) values (?,?)", (path, html_code))

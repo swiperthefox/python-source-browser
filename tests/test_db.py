@@ -32,6 +32,10 @@ class PSBDatabaseTestCase(TestCase):
         notes = self.psb_db.get_notes()
         self.assertEqual(len(notes), 2)
         self.assertEqual({"note", "note2"}, {notes[0][2], notes[1][2]})
+        self.psb_db.add_note(("f1.py#L-1", "TestClass", ""))
+        notes = self.psb_db.get_notes()
+        self.assertEqual(len(notes), 1)
+        self.assertEqual("TestClass2", notes[0][1])
 
     def test_op_on_codes(self):
         p, h = "/path/to.py", "<html code>"

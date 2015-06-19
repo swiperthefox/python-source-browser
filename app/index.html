@@ -73,7 +73,7 @@
         </div>
         <div class="noteEditor" data-bind="visible: showNoteEditor">
           <input type="text" placeholder="Add your one line note here. (Enter to save)"
-                 data-bind="textInput: editingNote, hasFocus: showNoteEditor, enter: saveEdit">
+                 data-bind="textInput: editingNote, hasFocus: showNoteEditor, selected: showNoteEditor, enter: saveEdit">
           (Enter to save, Tab to cancel)
         </div>
         <pre data-bind="html: excerpt" class="highlight"></pre>
@@ -81,6 +81,7 @@
 
     <script src="static/js/ko_viewFrame.js"></script>
     <script src="static/js/ko_enter.js"></script>
+    <script src="static/js/ko_selected.js"></script>
     <script src="static/js/psb.js"></script>
   </body>
 </html>

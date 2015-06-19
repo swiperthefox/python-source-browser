@@ -30,6 +30,7 @@ var NavFrame = function(location, symbol, content, note) {
   this.showNoteEditor = ko.observable(false);
   this.editingNote = ko.observable(note);
   this.editingStatus = ko.observable('');
+  this.oldNote = note;
 
   // bookkeeping for UI representation
   this.isCurrentFrame = ko.observable(true);
@@ -48,6 +49,9 @@ var NavFrame = function(location, symbol, content, note) {
 
   this.saveEdit = function(data, event) {
     event.stopPropagation();
+    if (self.oldNote == self.editingNote()) {
+      return;
+    }
     var noteData = {location: self.location,
                     symbol: self.symbol,
                     note: self.editingNote()};
@@ -56,6 +60,7 @@ var NavFrame = function(location, symbol, content, note) {
              var status = (textStatus==='success')?"green":"red";
              self.editingStatus(status);
              psbViewModel.noteList.setNotes(data['data']);
+             self.oldNote = self.editingNote();
            });
     self.showNoteEditor(false);
   };
@@ -188,6 +193,8 @@ var PSBViewModel = function() {
     var note = self.noteList.lookup(symbol, location);
     if (note.length > 0) {
       target.title = note;
+    } else {
+      target.title = '';
     }
     return true;
   };
