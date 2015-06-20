@@ -39,6 +39,7 @@ body {
 }
 .frame-title {
     position: relative;
+    padding-left: 3px;
     width: 100%;
 }
 .frame-action-btns {
@@ -57,4 +58,12 @@ div.noteEditor input {
 }
 .active-frame {
     background-color: #ffe68d;
+}
+.showWarning {
+    background-color: #f74a47;
+}
+#start_info {
+    width: 600px;
+    height: 400px;
+    margin: auto;
 }

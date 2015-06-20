@@ -12,7 +12,7 @@
     <link rel="stylesheet" href="/static/css/bootstrap.min.css">
     <link rel="stylesheet" href="/static/css/bootstrap-theme.min.css">
     <script src="/static/js/lib/bootstrap.min.js"></script>
-    <script src="/static/js/lib/knockout-3.3.0.js"></script>
+    <script src="/static/js/lib/knockout-3.3.0.debug.js"></script>
     <link rel="stylesheet" href="/static/css/pastie.css" />
     <link rel="stylesheet" href="/static/css/psb.css">
 
@@ -41,16 +41,17 @@
         </div>
         <div role="tabpanel" class="tab-pane" id="nav-stack" data-bind="with: navStackViewModel">
           <!-- ko foreach: navStack -->
-          <div class="nav-frame" data-bind="css: {'active-frame': isCurrentFrame},
-                                            click: $parent.setCurrentFrame">
-            <div class="frame-title">
-              <span data-bind="text: symbol"></span>
+          <div class="nav-frame" data-bind="click: $parent.setCurrentFrame">
+            <div class="frame-title"
+                 data-bind="css: {'active-frame': isCurrentFrame, 'showWarning': showWarning}">
+               <span data-bind="text: symbol"></span>
               @
               <span data-bind="text: realFileName"></span>
               <div class="frame-action-btns">
                 <span class="glyphicon glyphicon-pencil"
                       data-bind="click: editNote, style: {color: editingStatus}, visible: symbol"></span>
-                <span data-bind="click: $parent.deleteFrame" class="glyphicon glyphicon-eject"></span>
+                <span class="glyphicon glyphicon-eject"
+                      data-bind="click: $parent.deleteFrame"></span>
               </div>
             </div>
             <div class="noteEditor" data-bind="visible: showNoteEditor">
@@ -75,7 +76,12 @@
     </div>
 
     <div id="right-column">
-      <pre id="main-source" data-bind="sourceView: navStackViewModel.currentFrame().content" class="highlight"></pre>
+      <div id="main-source" data-bind="with: navStackViewModel.currentFrame">
+        <pre class="highlight" data-bind="sourceView: content"></pre>
+      </div>
+      <span data-bind="visible: !navStackViewModel.currentFrame()" id="start_info" >
+        To start browse, choose a file from the directory tree on the left side.
+      </span>
     </div>
 
     <script src="static/js/ko_sourceView.js"></script>

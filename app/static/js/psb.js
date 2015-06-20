@@ -34,6 +34,7 @@ var NavFrame = function(location, symbol, content, note) {
 
   // bookkeeping for UI representation
   this.isCurrentFrame = ko.observable(true);
+  this.showWarning = ko.observable(false);
 
   this.scrollTop = 0;
 
@@ -160,20 +161,55 @@ var NavStackViewModel = function() {
   var EMPTYFRAME = new NavFrame("", "", "To start browse, choose a file from "
                                         + "the directory tree on the left side.");
   this.navStack = ko.observableArray();
-  this.currentFrame = ko.observable(EMPTYFRAME);
+  this.currentFrame = ko.observable(null);
 
   this.setCurrentFrame = function(newFrame) {
     if (self.currentFrame() != newFrame) {
-      self.currentFrame().isCurrentFrame(false);
+      if (self.currentFrame()) {
+        self.currentFrame().isCurrentFrame(false);
+      }
       newFrame.isCurrentFrame(true);
       self.currentFrame(newFrame);
     }
   };
 
-  this.addNewFrame = function(newFrame, clearStack) {
-    if (clearStack) {
-      self.navStack.splice(0);
+  /*
+   * Check if current frame is in the middle of stack. If so, confirm that the user
+   * do want to discard parts of old stack, and continue from the current frame.
+   */
+  this.confirmBranching = function() {
+    if (self.currentFrame() == self.navStack()[self.navStack().length - 1]) {
+      return true; // nothing to worry about
     }
+    self.markFramesAfterCurrent(true);
+    var result = confirm("You are trying to branch from the middle of the stack. Do you want to discard the frames after current frame?");
+    self.markFramesAfterCurrent(false);
+    return result;
+  };
+
+  this.markFramesAfterCurrent = function(addMark) {
+    var currentFrame = self.currentFrame();
+    var navStack = self.navStack();
+
+    var i = self.navStack().length-1;
+    while (i>=0 && navStack[i] != currentFrame) {
+      navStack[i].showWarning(addMark);
+      --i;
+    }
+  };
+
+  this.discardFrames = function(clearStack) {
+    var idx = self.navStack.indexOf(self.currentFrame()) + 1;
+    if (clearStack) {
+      idx = 0;
+    }
+    self.navStack.splice(idx);
+  };
+
+  this.addNewFrame = function(newFrame, clearStack) {
+    var confirmed = self.confirmBranching();
+    if (!confirmed) return;
+    self.discardFrames(clearStack);
     self.navStack.push(newFrame);
     self.setCurrentFrame(newFrame);
   };
@@ -183,9 +219,9 @@ var NavStackViewModel = function() {
     if (idx != -1) {
       self.navStack.splice(idx);
     }
-    var lastFrame = (idx>0) ? self.navStack()[idx-1] : EMPTYFRAME;
+    var lastFrame = (idx > 0) ? self.navStack()[idx-1] : null;
     self.setCurrentFrame(lastFrame);
-    if (idx<=0) {
+    if (idx <= 0) {
       psbViewModel.showDirectoryTree();
     }
   };
