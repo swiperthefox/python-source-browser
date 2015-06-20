@@ -1,42 +1,82 @@
+/*
+ * A frame in a navigation stack.
+ *
+ * Consider a function call in the code:
+ *
+ * def caller():
+ *   ...
+ *   callee()
+ *
+ * We need the following infomation to identify this call relation:
+ *
+ * - The file name of the source (realFileName)
+ * - The content of the file
+ * - The caller (identified by callerDefStart, the line number of the starting
+ *   line of it's definition)
+ * - Where the call happens (identified by callSite, the line number of where
+ *   the call happens)
+ * - The callee ()
+ */
 var NavFrame = function(location, symbol, content, note) {
   var self = this;
   var excerptSize = 2;
-  var items = location.split('#L-');
+
+  // bookkeeping for UI representation, these two will change the css class of
+  // frame title
+  this.isCurrentFrame = ko.observable(true);
+  this.showWarning = ko.observable(false);
+
+  // The content is htmlized source code like this:
+  //
+  // <span id="foo-1">first line</span><br><span id="foo-2">second line</span>
+  //
+  // We need to show a few copys of contents like this in two
+  // different places: in the navigation stack frames and the main
+  // source viewing area. So we need to have different ids for the
+  // lines in these different places. Here we choose to add a prefix
+  // to the codes that shows in navigation stack frames. We will use
+  // the time at the moment as the prefix for each NavFrame object.
+
+  this.idPrefix = (new Date()).getTime() + '-';
 
   // code content of the frame
-  this.lineNumber = (items.length>1)?parseInt(items[1]):0;
+  this.allLines = content.split('<br>');
+  this.content = content;
   this.location = location;
   this.realFileName = location.substring(6);
-  var idRegexp = new RegExp('("foo-' + this.lineNumber + '")');
-  this.content = content.replace(idRegexp, '$1 class="hl_line"');
   this.symbol = symbol;
+  var items = location.split('#L-');
+  this.callerDefStart = (items.length>1)?parseInt(items[1]):0;
 
-  function getLines(text, linenum, size) {
+  // At the beginning, the user just start to look at the code in this file,
+  // and hasn't find an interesting call site yet, so we will just show the
+  // beginning of definition of the caller
+  this.callSite = ko.observable(this.callerDefStart);
+
+  // We will show the call site line, plus 2 more lines before and
+  // after that line in the navigation stack frame.
+  this.excerpt = ko.computed(function getLines() {
+    // find out the beginning index of the excerpt
+    var linenum = self.callSite();
     if (linenum === 0) {
       // don't interested in a specific line
       return "";
     }
-    var lines = text.split('<br>');
-    var windowSize = 1+2*size;
-    var lineStart = linenum - size;
-    lineStart = Math.min(lines.length - windowSize, lineStart);
+    var windowSize = 1+2*excerptSize;
+    var lineStart = linenum - excerptSize;
+    lineStart = Math.min(self.allLines.length - windowSize, lineStart);
     lineStart = Math.max(0, lineStart);
-    var excerptLines = lines.slice(lineStart, lineStart + windowSize);
-    return excerptLines.join('<br>');
-  };
-  this.excerpt = getLines(this.content, this.lineNumber, excerptSize);
+
+    var excerptLines = self.allLines.slice(lineStart, lineStart + windowSize);
+    var result = excerptLines.join('<br>');
+    return result.replace(/foo-/g, self.idPrefix);
+  }, this);
 
   // note editor for the symbol represented by this frame
   this.showNoteEditor = ko.observable(false);
   this.editingNote = ko.observable(note);
   this.editingStatus = ko.observable('');
   this.oldNote = note;
-
-  // bookkeeping for UI representation
-  this.isCurrentFrame = ko.observable(true);
-  this.showWarning = ko.observable(false);
-
-  this.scrollTop = 0;
 
   this.editNote = function(data, event) {
     event.stopPropagation();
@@ -130,9 +170,18 @@ var PSBViewModel = function() {
     });
   };
 
+  function getLineNumber(el) {
+    while (el && el.className != 'lineno') el = el.previousElementSibling;
+    return el ? parseInt(el.textContent) : NaN;
+  };
+
   // wrap gotoDefinition into an event handler
   this.symbolClickHandler = function(e) {
     var target = e.target;
+    var lineNumber = getLineNumber(target.parentElement);
+    if (!isNaN(lineNumber)) {
+      self.navStackViewModel.currentFrame().callSite(lineNumber);
+    }
     var url = target.getAttribute('href');
     self.gotoDefinition(url, target.text, false);
     return false;
@@ -220,6 +269,7 @@ var NavStackViewModel = function() {
       self.navStack.splice(idx);
     }
     var lastFrame = (idx > 0) ? self.navStack()[idx-1] : null;
+    lastFrame.callSite(lastFrame.callerDefStart);
     self.setCurrentFrame(lastFrame);
     if (idx <= 0) {
       psbViewModel.showDirectoryTree();

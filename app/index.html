@@ -60,7 +60,7 @@
                                 selected: showNoteEditor, enter: saveEdit">
               (Enter to save, Tab to cancel)
             </div>
-            <pre data-bind="sourceView: excerpt, stayInView: true" class="highlight"></pre>
+            <pre data-bind="sourceView: $data, inFrame: true, stayInView: true" class="highlight"></pre>
           </div>
           <!-- /ko -->
 
@@ -76,9 +76,7 @@
     </div>
 
     <div id="right-column">
-      <div id="main-source" data-bind="with: navStackViewModel.currentFrame">
-        <pre class="highlight" data-bind="sourceView: content"></pre>
-      </div>
+      <pre id="main-source" class="highlight" data-bind="sourceView: navStackViewModel.currentFrame"></pre>
       <span data-bind="visible: !navStackViewModel.currentFrame()" id="start_info" >
         To start browse, choose a file from the directory tree on the left side.
       </span>

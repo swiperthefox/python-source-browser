@@ -1,3 +1,7 @@
+/*
+ * Example use:
+ * <pre data-bind="sourceView: aNavFrameObj, inFrame: true"></pre>
+ */
 ko.bindingHandlers.sourceView = {
     init: function(element, valueAccessor, allBindings, viewModel, bindingContext) {
       // This will be called when the binding is first applied to an element
@@ -16,24 +20,36 @@ ko.bindingHandlers.sourceView = {
       // Next, whether or not the supplied model property is observable, get its current value
       var valueUnwrapped = ko.unwrap(value);
 
-      // set content
-      element.innerHTML = valueUnwrapped;
+      if (!valueUnwrapped) {
+        element.style.display = 'None';
+        return { controlsDescendantBindings: true };
+      } else {
+        element.style.display = 'block';
+      }
 
-      // show the desired line.
-      // It seems that it's best to put the desired line near to the top of source view.
-      // so we will try to put it in the third line
+      // set content
+      var inFrame = allBindings.get('inFrame');
+      element.innerHTML = (inFrame) ? valueUnwrapped.excerpt() : valueUnwrapped.content;
+
+      // highlight the call site line
+      var lineidPrefix = (inFrame) ? valueUnwrapped.idPrefix : "foo-";
+      var linenum = valueUnwrapped.callSite();
+      var highlighted = document.getElementById(lineidPrefix + linenum);
+      if (highlighted) {
+        highlighted.className += " hl_line";
+      }
+      // show the call site line. It looks best to put the call site
+      // line near to the top of source view. so we will try to put it
+      // in the third line from the top edge
       var isOverflowed = element.clientHeight < element.scrollHeight;
 
       if (isOverflowed) {
-        var highlighted = element.getElementsByClassName("hl_line")[0];
-        var pcount = 4; // we need to do at most four previousSibling
-        while (highlighted && highlighted.previousSibling && pcount > 0) {
-          highlighted = highlighted.previousSibling;
-          pcount--;
-        }
-        if (highlighted) {
-          highlighted.scrollIntoView();
+        linenum = Math.max(0, linenum-2); // if possible, show two more lines before call site
+        var lineToShow = document.getElementById(lineidPrefix + linenum);
+        if (lineToShow) {
+          lineToShow.scrollIntoView();
         }
       }
+      return true;
     }
 };
