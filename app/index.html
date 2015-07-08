@@ -29,7 +29,8 @@
           </a>
         </li>
         <li role="presentation">
-          <a href="#search" aria-controls="search" role="tab" data-toggle="tab">
+          <a id="search-btn" href="#search" aria-controls="search" role="tab" data-toggle="tab"
+             data-focus="searchTerm">
             Search
           </a>
         </li>
@@ -39,11 +40,13 @@
         <div role="tabpanel" class="tab-pane active" id="directory">
           <div id="directory-content"></div>
         </div>
+
         <div role="tabpanel" class="tab-pane" id="nav-stack" data-bind="with: navStackViewModel">
           <!-- ko foreach: navStack -->
-          <div class="nav-frame" data-bind="click: $parent.setCurrentFrame">
+          <div class="nav-frame" data-bind="click: $parent.setCurrentFrame,
+                                            css: {'active-frame': isCurrentFrame}">
             <div class="frame-title"
-                 data-bind="css: {'active-frame': isCurrentFrame, 'showWarning': showWarning}">
+                 data-bind="css: {'showWarning': showWarning}">
                <span data-bind="text: symbol"></span>
               @
               <span data-bind="text: realFileName"></span>
@@ -66,11 +69,19 @@
 
         </div>
         <div role="tabpanel" class="tab-pane" id="search" data-bind="with: searchViewModel">
-          <div><span data-bind="text: searchTerm"></span></div>
-          <div data-bind="foreach: searchResults">
-            <span data-bind="text: location"></span>
-            <span data-bind="text: code"></span>
+          <div class="input-group">
+            <input type="text" id="searchTerm" class="form-control" placeholder="term"
+                 data-bind="textInput: searchTerm">
+            <span class="input-group-addon" data-bind="visible: searchTerm().length >= 3">
+              <span data-bind="text: searchResults().length"></span> matches found.
+            </span>
           </div>
+          <!-- ko foreach: searchResults -->
+          <div class="nav-frame" data-bind="click: $parent.gotoEntry">
+            <span data-bind="text: location"></span>
+            <pre data-bind="html: code" class="highlight"></pre>
+          </div>
+          <!-- /ko -->
         </div>
       </div>
     </div>

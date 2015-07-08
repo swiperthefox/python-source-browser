@@ -50,8 +50,7 @@ class SourceConverter:
         else:
             shutil.move(tmp_tags, self.tagsfile)
 
-    def htmlize_python_file(self, full_path):
-        """Generate syntax highlighted html source from python source file"""
+    def htmlize_python_code(self, pycode, linenostart=1):
         if not self.tags_generated:
             self.make_tags()
 
@@ -61,14 +60,19 @@ class SourceConverter:
                   'tagsfile': self.tagsfile,
                   'lineanchors': 'L',
                   'linespans': 'foo',
-                  'lineseparator':''}
+                  'lineseparator':'',
+                  'linenostart':linenostart}
 
         lexer = pygments.lexers.PythonLexer()
         formatter = CodeHtmlFormatter(**config)
 
+        return pygments.highlight(pycode, lexer, formatter)
+
+    def htmlize_python_file(self, full_path):
+        """Generate syntax highlighted html source from python source file"""
         with open(full_path) as pyfile:
             pycode = pyfile.read()
-            return pygments.highlight(pycode, lexer, formatter)
+            return self.htmlize_python_code(pycode)
 
     def htmlize_plain_text(self, file_path):
         with open(file_path) as fp:
@@ -81,3 +85,16 @@ class SourceConverter:
             return self.htmlize_python_file(full_path)
         else:
             return self.htmlize_plain_text(full_path)
+
+def htmlize_python_code(pycode, pygments_config):
+    config = {'linenos': 'inline',
+              'anchorlinenos': True,
+              'lineanchors': 'L',
+              'linespans': 'foo',
+              'lineseparator':''}
+    config.update(pygments_config)
+
+    lexer = pygments.lexers.PythonLexer()
+    formatter = CodeHtmlFormatter(**config)
+
+    return pygments.highlight(pycode, lexer, formatter)

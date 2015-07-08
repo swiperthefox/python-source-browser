@@ -13,6 +13,7 @@ from flask import Flask, request, jsonify, g, current_app, send_from_directory
 from app.htmlizer import SourceConverter
 from app.db import PSBDatabase
 from app.path_utils import list_dir
+from app.search import search
 
 DATABASE = 'to be configured'
 DEBUG = True
@@ -87,6 +88,13 @@ def index():
     print ("index")
     return send_from_directory(os.path.dirname(__file__), 'index.html')
 
+@app.route('/search')
+def search_code():
+    term = request.values['term']
+    exact_word_search = request.values.get('exact', False)
+    result = search(term, app.config['PROJECTROOT'], exact_word_search)
+    return jsonify(data=result)
+
 def config_app(project_root):
     """Configuration based on the proejct_root"""
     rel_project_root = os.path.relpath(project_root)
@@ -138,4 +146,4 @@ if __name__ == '__main__':
     # wait for 1 second so that the server can start
     threading.Timer(1, lambda: webbrowser.open(url, autoraise=True)).start()
 
-    app.run(port=port, use_reloader=False)
+    app.run(port=port, debug=True)

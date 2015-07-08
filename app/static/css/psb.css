@@ -25,12 +25,15 @@ body {
     width: 100%;
     overflow-y: auto;
 }
+.tab-pane {
+    padding-top: 4px;
+}
 #main-source {
     flex: 1;
     overflow: auto;
 }
 .nav-frame {
-    margin: 5px 0px;
+    margin: 4px 0px 0px 0px;
     border-radius: 6px 6px 6px 6px;
     -moz-border-radius: 6px 6px 6px 6px;
     -webkit-border-radius: 6px 6px 6px 6px;
@@ -66,4 +69,7 @@ div.noteEditor input {
     width: 600px;
     height: 400px;
     margin: auto;
+}
+.input-group {
+    width: 100%;
 }

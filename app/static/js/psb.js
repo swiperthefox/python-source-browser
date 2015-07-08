@@ -138,8 +138,43 @@ var NoteList = function() {
   this.getNotes();
 };
 var SearchViewModel = function() {
+  var self = this;
   this.searchResults = ko.observableArray();
   this.searchTerm = ko.observable('');
+  this.wordMatch = ko.observable(false);
+  this.scheduled = undefined;
+
+  this.searchTerm.subscribe(function search(newterm) {
+    if (newterm.length < 3) {
+      self.searchResults.splice(0);
+      return;
+    }
+    if (self.scheduled) {
+      clearTimeout(self.scheduled);
+    }
+    var wordMatch = self.wordMatch();
+    self.scheduled = setTimeout(function() {
+      var url = "/search?term=" + newterm;
+      if (wordMatch) {
+        url += '&exact=1';
+      }
+      $.getJSON(url, function(data) {
+        self.searchResults(data['data']);
+      });
+    }, 300);
+  });
+
+  this.search = function(term, wordMatch) {
+    var old = self.wordMatch();
+    self.wordMatch(wordMatch);
+    self.searchTerm(term);
+    self.wordMatch(old);
+  };
+
+  this.gotoEntry = function(data) {
+    var url = '/file/' + data.location + '#L-' + data.lineno;
+    psbViewModel.gotoDefinition(url, '', true);
+  };
 };
 
 var PSBViewModel = function() {
@@ -161,6 +196,10 @@ var PSBViewModel = function() {
     $('#directory-btn').tab('show');
   };
 
+  this.showSearchPane = function () {
+    $('#search-btn').tab('show');
+  };
+
   this.gotoDefinition = function(url, symbol, clearStack) {
     $.get(url, function(file_content) {
       var note = self.noteList.lookup(url, symbol);
@@ -175,15 +214,28 @@ var PSBViewModel = function() {
     return el ? parseInt(el.textContent) : NaN;
   };
 
+  function isSelfReference(el) {
+    // check if el's href is pointing to it self
+    var location = self.navStackViewModel.currentFrame().location;
+    var currentFile = location.split('#')[0];
+    var currentLine = getLineNumber(el.parentElement);
+    return el.getAttribute('href') == currentFile + '#L-' + currentLine;
+};
+
   // wrap gotoDefinition into an event handler
   this.symbolClickHandler = function(e) {
     var target = e.target;
-    var lineNumber = getLineNumber(target.parentElement);
-    if (!isNaN(lineNumber)) {
-      self.navStackViewModel.currentFrame().callSite(lineNumber);
+    if (!isSelfReference(target)) {
+      var lineNumber = getLineNumber(target.parentElement);
+      if (!isNaN(lineNumber)) {
+        self.navStackViewModel.currentFrame().callSite(lineNumber);
+      }
+      var url = target.getAttribute('href');
+      self.gotoDefinition(url, target.text, false);
+    } else {
+      self.searchViewModel.search(target.text, true);
+      self.showSearchPane();
     }
-    var url = target.getAttribute('href');
-    self.gotoDefinition(url, target.text, false);
     return false;
   };
 
@@ -217,7 +269,9 @@ var NavStackViewModel = function() {
       if (self.currentFrame()) {
         self.currentFrame().isCurrentFrame(false);
       }
-      newFrame.isCurrentFrame(true);
+      if (newFrame) {
+        newFrame.isCurrentFrame(true);
+      }
       self.currentFrame(newFrame);
     }
   };
@@ -269,9 +323,11 @@ var NavStackViewModel = function() {
       self.navStack.splice(idx);
     }
     var lastFrame = (idx > 0) ? self.navStack()[idx-1] : null;
-    lastFrame.callSite(lastFrame.callerDefStart);
     self.setCurrentFrame(lastFrame);
-    if (idx <= 0) {
+
+    if (lastFrame) {
+      lastFrame.callSite(lastFrame.callerDefStart);
+    } else {
       psbViewModel.showDirectoryTree();
     }
   };
@@ -311,6 +367,13 @@ var psbViewModel = new PSBViewModel();
         data.instance.toggle_node(data.node);
       }
     });
+
+  $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
+    var focusID = e.target.getAttribute('data-focus');
+    if (focusID) {
+      document.getElementById(focusID).focus();
+    }// newly activated tab
+  });
 })();
 
 ko.applyBindings(psbViewModel);
