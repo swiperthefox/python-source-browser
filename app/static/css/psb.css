@@ -73,3 +73,7 @@ div.noteEditor input {
 .input-group {
     width: 100%;
 }
+
+.label-as-badge {
+    border-radius: 1em;
+}

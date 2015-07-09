@@ -70,10 +70,15 @@
         </div>
         <div role="tabpanel" class="tab-pane" id="search" data-bind="with: searchViewModel">
           <div class="input-group">
-            <input type="text" id="searchTerm" class="form-control" placeholder="term"
-                 data-bind="textInput: searchTerm">
-            <span class="input-group-addon" data-bind="visible: searchTerm().length >= 3">
-              <span data-bind="text: searchResults().length"></span> matches found.
+            <span class="input-group-addon">Match whole word
+              <input type="checkbox"  data-bind="checked: wordMatch">
+            </span>
+            <input type="search" class="form-control" aria-label="term to search" id="searchTerm"
+                   placeholder="term" data-bind="textInput: searchTerm">
+            <span class="input-group-addon">
+              <span data-bind="text: (searchTerm().length>2)?searchResults().length:'●'"
+                    class="label label-info label-as-badge" ></span>
+              <span data-bind="text: searchAgain"></span>
             </span>
           </div>
           <!-- ko foreach: searchResults -->
@@ -89,7 +94,13 @@
     <div id="right-column">
       <pre id="main-source" class="highlight" data-bind="sourceView: navStackViewModel.currentFrame"></pre>
       <span data-bind="visible: !navStackViewModel.currentFrame()" id="start_info" >
-        To start browse, choose a file from the directory tree on the left side.
+        To start browsing, go to left side:
+        <ul>
+          <li>Choose a file from the "Directory Tree" tab.</li>
+          or
+          <li>Search for a name in the "Search" tab.</li>
+        </ul>
+
       </span>
     </div>
 
@@ -97,6 +108,9 @@
     <script src="static/js/ko_enter.js"></script>
     <script src="static/js/ko_selected.js"></script>
     <script src="static/js/ko_stayInView.js"></script>
+    <script src="static/js/psbNotes.js"></script>
+    <script src="static/js/SearchViewModel.js"></script>
+    <script src="static/js/navigationFrame.js"></script>
     <script src="static/js/psb.js"></script>
   </body>
 </html>
