@@ -10,7 +10,8 @@ import argparse
 
 from flask import Flask, request, jsonify, g, current_app, send_from_directory
 
-from app.htmlizer import SourceConverter
+from app.mktags import make_tags
+from app.htmlizer import pygmentize
 from app.db import PSBDatabase
 from app.path_utils import list_dir
 from app.search import search
@@ -26,7 +27,6 @@ PSBDATADIR = os.path.expanduser("~/.psb")
 app = Flask(__name__)
 
 app.config.from_object(__name__)
-source_conveter = None # will be set in config_app
 
 def get_db():
     """Opens a new database connection if there is none yet for the
@@ -42,17 +42,6 @@ def close_db(error):
     """Closes the database again at the end of the request."""
     if hasattr(g, 'sqlite_db'):
         g.sqlite_db.close()
-
-
-def get_html(path):
-    result = html_from_db(path)
-    if len(result) == 0:
-        # create html source, save it, and return it
-        html_code = source_conveter.pygments(path)
-        html_into_db(path, html_code)
-        return html_code
-    else:
-        return result[0]
 
 @app.route('/notes')
 def get_notes():
@@ -73,14 +62,20 @@ def create_note():
 def get_source(path, use_cache=False):
     if path == '':
         return jsonify(list_dir(current_app.config['PROJECTROOT']))
+    pygments_config = {
+        'tagurlformat': '/file/%(path)s%(fname)s%(fext)s',
+        'tagsfile': current_app.config['TAGSFILE']
+    }
+    full_path = os.path.join(current_app.config['PROJECTROOT'], path)
     if use_cache:
         psb_db = get_db()
         result = psb_db.get_html(path)
         if result is None:
-            result = source_conveter.pygmentize(path)
+            full_path = os.path.join(current_app.config['PROJECTROOT'], path)
+            result = pygmentize(full_path, pygments_config)
             psb_db.save_html(path, result)
     else:
-        result = source_conveter.pygmentize(path)
+        result = pygmentize(full_path, pygments_config)
     return result
 
 @app.route('/')
@@ -121,8 +116,8 @@ def config_app(project_root):
     if not os.path.isfile(app.config['DATABASE']):
         with app.open_resource('schema.sql', mode='r') as schema_fd:
             PSBDatabase.initialize_db(app.config['DATABASE'], schema_fd.read())
-    global source_conveter
-    source_conveter = SourceConverter(rel_project_root, app.config['TAGSFILE'])
+
+    make_tags(rel_project_root, app.config['TAGSFILE'])
 
 def make_argparser():
     parser = argparse.ArgumentParser(description="Browse the source code in given directory.")

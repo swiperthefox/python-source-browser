@@ -94,7 +94,7 @@ def parse_grep_out(segment):
     for i, line in enumerate(lines):
         sep, sep_pos = next_sep(line)
         if sep == ':':
-            hitlines.append(i+1)
+            hitlines.append(i+1) # pygments hl_lines option is 1 based
         code = line[sep_pos+1:]
         codes.append(code)
     return (filename, start_line_num, hitlines, codes)

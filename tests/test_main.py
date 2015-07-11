@@ -49,7 +49,7 @@ class PSBServerTestCase(TestCase, HTMLTestMixin):
         self.assertEqual("plain text file is not syntax highlighted.", result.data.strip())
 
         multi_line_result = self.app.get('/file/dir1/multi_line')
-        self.assertEqual("first line\n<br>second line", multi_line_result.data.strip())
+        self.assertEqual("first line<br>second line", multi_line_result.data.strip())
 
     def test_get_python_file(self):
         result = self.app.get('/file/f1_2.py')
