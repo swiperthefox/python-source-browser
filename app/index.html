@@ -52,9 +52,13 @@
               <span data-bind="text: realFileName"></span>
               <div class="frame-action-btns">
                 <span class="glyphicon glyphicon-pencil"
-                      data-bind="click: editNote, style: {color: editingStatus}, visible: symbol"></span>
+                      data-bind="click: editNote,
+                                 style: {color: editingStatus},
+                                 visible: symbol,
+                                 attr: {title: 'Add note to ' + symbol}"></span>
                 <span class="glyphicon glyphicon-eject"
-                      data-bind="click: $parent.deleteFrame"></span>
+                      data-bind="click: $parent.deleteFrame"
+                      title="Remove this and the following frames"></span>
               </div>
             </div>
             <div class="noteEditor" data-bind="visible: showNoteEditor">
@@ -93,15 +97,15 @@
 
     <div id="right-column">
       <pre id="main-source" class="highlight" data-bind="sourceView: navStackViewModel.currentFrame"></pre>
-      <span data-bind="visible: !navStackViewModel.currentFrame()" id="start_info" >
-        To start browsing, go to left side:
+      <pre id="start_info" data-bind="visible: !navStackViewModel.currentFrame()">
+  <b>To start browsing, go to left side:</b>
         <ul>
           <li>Choose a file from the "Directory Tree" tab.</li>
-          or
+          <b>or</b>
+
           <li>Search for a name in the "Search" tab.</li>
         </ul>
-
-      </span>
+      </pre>
     </div>
 
     <script src="static/js/ko_sourceView.js"></script>

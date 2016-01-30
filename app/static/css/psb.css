@@ -2,9 +2,12 @@ html {
     position: absolute;
     top: 10px;
     bottom: 10px;
+    left: 5px;
+    right: 5px;
 }
 body {
     height: 100%;
+    width: 100%;
 }
 #left-column, #right-column {
     display: inline-flex;
@@ -12,13 +15,16 @@ body {
     flex-direction: column;
 }
 #left-column {
-    width: 600px;
-    margin-left: 20px;
+    width: 38%;
+    margin: 0px;
     vertical-align: top;
+    font-size: 1vw;
 }
 #right-column {
-    width: 800px;
-    margin-left: 40px;
+    width: 60%;
+    margin-left: 10px;
+    font-size: 2vw;
+    justify-content: center;
 }
 .tab-content {
     flex: 1;
@@ -32,13 +38,24 @@ body {
     flex: 1;
     overflow: auto;
 }
+
+#left-column pre {
+    font-size: 0.8vw;
+}
+#main-source {
+    font-size: 1vw;
+}
+
 .nav-frame {
     margin: 4px 0px 0px 0px;
     border-radius: 6px 6px 6px 6px;
     -moz-border-radius: 6px 6px 6px 6px;
     -webkit-border-radius: 6px 6px 6px 6px;
     border: 0px solid #000000;
-    background: #f2c66d;
+    background: #ffe68d;
+}
+.active-frame {
+    background-color: #f2c66d;
 }
 .frame-title {
     position: relative;
@@ -59,16 +76,13 @@ div.noteEditor input {
 .hl_line {
     background-color: #9af99c;
 }
-.active-frame {
-    background-color: #ffe68d;
-}
 .showWarning {
     background-color: #f74a47;
 }
 #start_info {
-    width: 600px;
-    height: 400px;
     margin: auto;
+    font-size: 20px;
+    white-space: pre-line;
 }
 .input-group {
     width: 100%;
@@ -76,4 +90,13 @@ div.noteEditor input {
 
 .label-as-badge {
     border-radius: 1em;
+}
+.nav-frame.active-frame:before {
+    content: "";
+    position: absolute;
+    left: 38%; /* this matches the #left-column's width */
+    margin-top: -40px;
+    border-right: 20px solid #DDD; /* fill the gap between left and right column */
+    border-top: 80px solid rgba(0, 0, 0, 0); /* remove top left and bottom left parts */
+    border-bottom: 80px solid rgba(0, 0, 0, 0);
 }
