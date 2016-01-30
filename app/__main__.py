@@ -10,6 +10,11 @@ import argparse
 
 from flask import Flask, request, jsonify, g, current_app, send_from_directory
 
+# Workaround for the werkzeug reloader removing the current directory from the
+# path. It's nasty, but it works! Inspired by:
+# https://github.com/mitsuhiko/flask/issues/1246
+os.environ['PYTHONPATH'] = os.getcwd()
+
 from app.mktags import make_tags
 from app.htmlizer import pygmentize
 from app.db import PSBDatabase
@@ -17,7 +22,7 @@ from app.path_utils import list_dir
 from app.search import search
 
 DATABASE = 'to be configured'
-DEBUG = True
+DEBUG = False
 SECRET_KEY = 'we do not need it'
 USERNAME = 'no'
 PASSWORD = 'no'
@@ -76,6 +81,7 @@ def get_source(path, use_cache=False):
             psb_db.save_html(path, result)
     else:
         result = pygmentize(full_path, pygments_config)
+        print (result[:100])
     return result
 
 @app.route('/')
@@ -141,4 +147,4 @@ if __name__ == '__main__':
     # wait for 1 second so that the server can start
     threading.Timer(1, lambda: webbrowser.open(url, autoraise=True)).start()
 
-    app.run(port=port, debug=True)
+    app.run(port=port, debug=DEBUG)
