@@ -6,6 +6,7 @@ from __future__ import (
 
 import pygments, pygments.lexers, pygments.formatters
 import os
+from cgi import escape
 
 class CodeHtmlFormatter(pygments.formatters.HtmlFormatter):
     def wrap(self, source, outfile):
@@ -35,7 +36,8 @@ def htmlize_python_code(pycode, pygments_config={}):
 
 def htmlize_plain_text(text):
     lines = text.splitlines()
-    return "<br>".join(lines)
+    escaped = map(escape, lines)
+    return "<br>".join (escaped)
 
 def pygmentize(full_path, pygments_config={}):
     with open(full_path) as pyfile:

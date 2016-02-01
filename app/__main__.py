@@ -7,6 +7,9 @@ import os
 import errno
 import logging
 import argparse
+import sys
+reload(sys)
+sys.setdefaultencoding('utf8')
 
 from flask import Flask, request, jsonify, g, current_app, send_from_directory
 
@@ -22,7 +25,7 @@ from app.path_utils import list_dir
 from app.search import search
 
 DATABASE = 'to be configured'
-DEBUG = False
+DEBUG = True
 SECRET_KEY = 'we do not need it'
 USERNAME = 'no'
 PASSWORD = 'no'
@@ -81,7 +84,6 @@ def get_source(path, use_cache=False):
             psb_db.save_html(path, result)
     else:
         result = pygmentize(full_path, pygments_config)
-        print (result[:100])
     return result
 
 @app.route('/')
@@ -115,7 +117,9 @@ def config_app(project_root):
         os.makedirs(os.path.join(datadir, 'databases'))
         os.mkdir(os.path.join(datadir, 'tags'))
     except OSError as err:
-        if err.errno != errno.EEXIST:
+        # it's ok if the directories already exist
+        dirs_exist = err.errno == errno.EEXIST
+        if not dirs_exist:
             raise
 
     # initialize the database only on the first time
