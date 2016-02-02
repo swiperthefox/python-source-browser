@@ -7,6 +7,7 @@ import os
 import errno
 import logging
 import argparse
+from uuid import uuid4
 import sys
 reload(sys)
 sys.setdefaultencoding('utf8')
@@ -30,11 +31,43 @@ SECRET_KEY = 'we do not need it'
 USERNAME = 'no'
 PASSWORD = 'no'
 PROJECTROOT = 'to be configured'
-PSBDATADIR = os.path.expanduser("~/.psb")
 
 app = Flask(__name__)
 
 app.config.from_object(__name__)
+
+def config_app(project_root):
+    """Configuration based on the proejct_root"""
+    rel_project_root = os.path.relpath(project_root)
+    abs_project_root = os.path.abspath(project_root)
+    datadir = os.path.join(abs_project_root, "psb")
+    uniquename = str(uuid4())
+
+#    root_as_file_name = os.path.abspath(project_root).replace(os.path.sep, '_')
+    dbfile = os.path.join(datadir, uniquename + '.sqlite')
+    tagsfile = os.path.join(datadir, uniquename + '.tags')
+    config = {
+        'DATABASE': dbfile,
+        'PROJECTROOT': os.path.abspath(project_root),
+        'TAGSFILE': tagsfile
+    }
+    app.config.update(config)
+
+    # create directories for data
+    try:
+        os.makedirs(datadir)
+    except OSError as err:
+        # it's ok if the directories already exist
+        dirs_exist = err.errno == errno.EEXIST
+        if not dirs_exist:
+            raise
+
+    # initialize the database only on the first time
+    if not os.path.isfile(app.config['DATABASE']):
+        with app.open_resource('schema.sql', mode='r') as schema_fd:
+            PSBDatabase.initialize_db(app.config['DATABASE'], schema_fd.read())
+
+    make_tags(rel_project_root, app.config['TAGSFILE'])
 
 def get_db():
     """Opens a new database connection if there is none yet for the
@@ -97,37 +130,6 @@ def search_code():
     exact_word_search = request.values.get('exact', False)
     result = search(term, app.config['PROJECTROOT'], exact_word_search)
     return jsonify(data=result)
-
-def config_app(project_root):
-    """Configuration based on the proejct_root"""
-    rel_project_root = os.path.relpath(project_root)
-    datadir = app.config['PSBDATADIR']
-    root_as_file_name = os.path.abspath(project_root).replace(os.path.sep, '_')
-    dbfile = os.path.join(datadir, 'databases', root_as_file_name + '.sqlite')
-    tagsfile = os.path.join(datadir, 'tags', root_as_file_name + '.tags')
-    config = {
-        'DATABASE': dbfile,
-        'PROJECTROOT': os.path.abspath(project_root),
-        'TAGSFILE': tagsfile
-    }
-    app.config.update(config)
-
-    # create directories for data
-    try:
-        os.makedirs(os.path.join(datadir, 'databases'))
-        os.mkdir(os.path.join(datadir, 'tags'))
-    except OSError as err:
-        # it's ok if the directories already exist
-        dirs_exist = err.errno == errno.EEXIST
-        if not dirs_exist:
-            raise
-
-    # initialize the database only on the first time
-    if not os.path.isfile(app.config['DATABASE']):
-        with app.open_resource('schema.sql', mode='r') as schema_fd:
-            PSBDatabase.initialize_db(app.config['DATABASE'], schema_fd.read())
-
-    make_tags(rel_project_root, app.config['TAGSFILE'])
 
 def make_argparser():
     parser = argparse.ArgumentParser(description="Browse the source code in given directory.")

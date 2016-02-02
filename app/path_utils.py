@@ -19,7 +19,7 @@ def make_sure_dir(dir_path):
     if not os.path.isdir(dir_path):
         os.makedirs(dir_path)
 
-def list_dir(dir_path, excluded_dirs=[], ignored_exts=['.pyc']):
+def list_dir(dir_path, excluded_dirs=["psb"], ignored_exts=['.pyc']):
     """
     List the directories and files in dir_path in the following format:
     { 'text': 'grandparent',
@@ -72,5 +72,3 @@ def list_dir(dir_path, excluded_dirs=[], ignored_exts=['.pyc']):
                         'type': 'file'}
             current_table['children'].append(new_node)
     return root
-
-

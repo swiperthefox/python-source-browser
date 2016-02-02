@@ -58,3 +58,5 @@ target/
 psb_cache
 app/.tern-project
 .tern-port
+psb
+.psb
