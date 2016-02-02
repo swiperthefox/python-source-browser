@@ -4,11 +4,11 @@ import shutil
 import tempfile
 
 from app.mktags import make_tags
-from utils import getFixtureDir
+from utils import getFixtureSampleProject
 
 class HtmilizerTestCase(TestCase):
     def test_make_tags(self):
-        root = getFixtureDir()
+        root = getFixtureSampleProject()
         fd, tagsfile = tempfile.mkstemp()
         os.close(fd)
         if os.path.isfile(tagsfile):

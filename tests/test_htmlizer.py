@@ -3,13 +3,13 @@ import os
 import shutil
 import tempfile
 
-from utils import HTMLTestMixin, getFixtureDir
+from utils import HTMLTestMixin, getFixtureSampleProject
 from app import htmlizer
 from app.mktags import make_tags
 
 class HtmilizerTestCase(TestCase, HTMLTestMixin):
     def setUp(self):
-        self.root = getFixtureDir()
+        self.root = getFixtureSampleProject()
         fd, self.tagsfile = tempfile.mkstemp()
         os.close(fd)
         make_tags(self.root, self.tagsfile)
@@ -24,8 +24,8 @@ class HtmilizerTestCase(TestCase, HTMLTestMixin):
         html_code = htmlizer.pygmentize(full_path, pygments_config)
         import logging; logging.info(html_code)
         self.check_link_for_symbol(html_code,
-                                   [("Test", "/file/dir2/f2_1.py#L-1"),
-                                    ("a", "/file/f1_1.py#L-1")])
+                                   [("Test", u"/file/dir2/f2_1.py#L-1"),
+                                    ("a", u"/file/f1_1.py#L-1")])
 
     def tearDown(self):
         os.remove(self.tagsfile)

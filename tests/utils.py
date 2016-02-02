@@ -13,4 +13,10 @@ def link_for_text(html, text):
 
 def getFixtureDir():
     relpath = os.path.relpath(os.path.dirname(__file__), os.getcwd())
-    return os.path.join(relpath, 'fixtures/sample-dir')
+    return os.path.join(relpath, 'fixtures/')
+
+def getFixturePath(path):
+    return os.path.join(getFixtureDir(), path)
+
+def getFixtureSampleProject():
+    return getFixturePath("sample-dir")

@@ -3,13 +3,13 @@ import os
 import tempfile
 import json
 
-from utils import HTMLTestMixin, getFixtureDir
+from utils import HTMLTestMixin, getFixtureSampleProject
 from app import __main__ as main
 
 class PSBServerTestCase(TestCase, HTMLTestMixin):
 
     def setUp(self):
-        project_root = getFixtureDir()
+        project_root = getFixtureSampleProject()
         import logging; logging.info(project_root)
         main.config_app(project_root)
         main.app.config['TESTING'] = True

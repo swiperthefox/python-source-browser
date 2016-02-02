@@ -25,7 +25,7 @@ from app.path_utils import list_dir
 from app.search import search
 
 DATABASE = 'to be configured'
-DEBUG = True
+DEBUG = False
 SECRET_KEY = 'we do not need it'
 USERNAME = 'no'
 PASSWORD = 'no'
