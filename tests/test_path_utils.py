@@ -5,7 +5,7 @@ from utils import getFixtureSampleProject
 
 class PathUtilsTestCase(TestCase):
     def test_list_dir(self):
-        result = path_utils.list_dir(getFixtureSampleProject(), ['psb_cache'])
+        result = path_utils.list_dir(getFixtureSampleProject())
         self.assertEqual(result['text'], 'root')
         self.assertEqual(len(result['children']), 5)
         children = result['children']

@@ -7,10 +7,6 @@ import os
 import errno
 import logging
 import argparse
-from uuid import uuid4
-import sys
-reload(sys)
-sys.setdefaultencoding('utf8')
 
 from flask import Flask, request, jsonify, g, current_app, send_from_directory
 
@@ -41,7 +37,7 @@ def config_app(project_root):
     rel_project_root = os.path.relpath(project_root)
     abs_project_root = os.path.abspath(project_root)
     datadir = os.path.join(abs_project_root, "psb")
-    uniquename = str(uuid4())
+    uniquename = abs_project_root.replace(os.path.sep, "_")
 
 #    root_as_file_name = os.path.abspath(project_root).replace(os.path.sep, '_')
     dbfile = os.path.join(datadir, uniquename + '.sqlite')
