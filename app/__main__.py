@@ -133,7 +133,7 @@ def make_argparser():
     parser.add_argument("project_root", help="The root directory of the project")
     return parser
 
-if __name__ == '__main__':
+def main():
     import sys
     import webbrowser
     import threading
@@ -150,3 +150,6 @@ if __name__ == '__main__':
     threading.Timer(1, lambda: webbrowser.open(url, autoraise=True)).start()
 
     app.run(port=port, debug=DEBUG)
+
+if __name__ == '__main__':
+    main()
