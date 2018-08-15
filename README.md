@@ -10,11 +10,11 @@ A tool for browsing python sources.
 
 ### Why:
 
-While I need to browse and understand a python project, I want some tools to help me cruise through the codes. But I didn't found my ideal one.
+When I need to browse and understand a python project, I want some tools to help me cruise through the codes. But I didn't found my ideal one.
 
-With the support of static analysis tools, like [Jedi](https://github.com/davidhalter/jedi), I could jump to a definition of a specific name, browse around it, and jump to another name that I am interested in, and so on. With the support of my editor, I can also jump back to where I come from, once at a time. But I found that sometimes, after a few jumps, I would lost the whole picture of this jump around game: I forget why I am here. Things will get even worse if some indrective recursive calls is involved.
+With the support of static analysis tools, like [Jedi](https://github.com/davidhalter/jedi), I could jump to a definition of a specific name, browse around it, and jump to another name that I am interested in, and so on. With the support of my editor, I can also jump back to where I come from, once at a time. But I found that  sometimes, after a few jumps, I would lost the whole picture of this jump around game: I forget why I am here. Things will get even worse if some indrective recursive calls is involved.
 
-[Some](http://blog.prashanthellina.com/2007/11/14/generating-call-graphs-for-understanding-and-refactoring-python-code/) [tools](https://pycallgraph.readthedocs.org/en/master/) has developed to generate call graphs of python sources, but as the project size grows, the call graphs can become overwhelmingly complicated very soon.
+[Some](http://blog.prashanthellina.com/2007/11/14/generating-call-graphs-for-understanding-and-refactoring-python-code/) [tools](https://pycallgraph.readthedocs.org/en/master/) has been developed to generate call graphs of python sources, but as the project size grows, the call graphs can become overwhelmingly complicated very soon.
 
 This project is an experiment to try another way of source browsing: The user will lead the trip, decide where to start from; which symbol to visit next; when to go back and try another road; occacionally make some comments on interesting symbols. The program will provide helps along the trip: finds out where the symbol is; keeps and shows a map of the trip, so that the user will not be lost; magically tranport the user to a previously visited stop, without go through the stops in between; take notes of those useful comments that the user has made, and show them out whenever that symbol appears again.
 
@@ -29,7 +29,7 @@ This project is an experiment to try another way of source browsing: The user wi
 
 Download or clone the source, go to the source directory. (In a virtual enviroment or not) do
 
-    pip -r requirements.txt
+    pip install -r requirements.txt
 
 Then
 
